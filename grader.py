@@ -12,12 +12,18 @@ def run_grader():
         default="game",
         help="object filename (default: game)"
     )
+    parser.add_argument(
+        "--testcase_dir",
+        type=str,
+        default="../testcase/",
+        help="path to testcase directory (default: ../testcase/)"
+    )
     args = parser.parse_args()
 
     # config
     game = args.target
     executable = f"{game}.exe" if os.name == 'nt' else f"./{game}"
-    testcase_dir = os.path.abspath("../testcase/")
+    testcase_dir = os.path.abspath(args.testcase_dir)
 
     # check if executable exist
     if not os.path.exists(executable):
