@@ -1,3 +1,4 @@
+#include "game_logger.hpp"
 #include "game_logic.hpp"
 
 /* ---------- Game Logic ---------- */
@@ -87,7 +88,7 @@ void makeMove(char board[][BOARD_N_MAX],
               const int col,
               const char symbol)
 {
-  // TODO: making move
+  board[row][col] = symbol;
 }
 
 bool isEmptyHead(char board[][BOARD_N_MAX],
@@ -252,10 +253,15 @@ pII botMove(char board[][BOARD_N_MAX],
 pII random_pick(char board[][BOARD_N_MAX],
                 const int size)
 {
-  // TODO: student implementation
+  int row, col;
+  
+  do
+  {
+    row = rand() % size;
+    col = rand() % size;
+  } while (!isValidMove(board, size, row, col));
 
-  // placeholder
-  return std::make_pair(-1, -1);
+  return std::make_pair(row, col);
 }
 
 // Level 2

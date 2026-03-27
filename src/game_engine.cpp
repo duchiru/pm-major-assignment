@@ -5,6 +5,7 @@
 #include "game_interaction.hpp"
 #include "game_logic.hpp"
 #include "game_renderer.hpp"
+#include "game_helper.hpp"
 
 /* ---------- Game Engine ---------- */
 /**
@@ -156,6 +157,20 @@ GameResult playGame(const RunConfig &config,
 
     if (isBot)
     {
+      pII botMoveResult = measureExecutionTime(
+          "botMove",
+          [&]()
+          {
+            return botMove(gameSetup.board,
+                           gameSetup.size,
+                           gameSetup.goal,
+                           symbols[currentPlayer],
+                           gameSetup.levels[currentPlayer]);
+          },
+          true);
+      
+      row = botMoveResult.first;
+      col = botMoveResult.second;
     }
     else
     {
@@ -164,7 +179,7 @@ GameResult playGame(const RunConfig &config,
         std::cout << "\t+ Invalid move. Please try again.\n";
     }
 
-    gameSetup.board[row][col] = symbols[currentPlayer];
+    makeMove(gameSetup.board, row, col, symbols[currentPlayer]);
     currentPlayer = 1 - currentPlayer;
   }
 
