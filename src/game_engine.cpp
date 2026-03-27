@@ -143,6 +143,7 @@ GameResult playGame(const RunConfig &config,
   // 2. Main game loop
   while (true)
   {
+    clearScreen();
     displayBoard(gameSetup.board, gameSetup.size);
 
     // Determine player type for current turn
@@ -161,10 +162,9 @@ GameResult playGame(const RunConfig &config,
       showSelectMenu(SelectType::PLAYER_UI, gameSetup);
       while (!GameInteraction::getPlayerMove(&row, &col) || !isValidMove(gameSetup.board, gameSetup.size, row, col))
         std::cout << "\t+ Invalid move. Please try again.\n";
-
-      gameSetup.board[row][col] = symbols[currentPlayer];
     }
 
+    gameSetup.board[row][col] = symbols[currentPlayer];
     currentPlayer = 1 - currentPlayer;
   }
 

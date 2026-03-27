@@ -145,8 +145,6 @@ void showSelectMenu(SelectType selectType, GameSetup &currentGameSetup)
  */
 void displayBoard(const char board[][BOARD_N_MAX], const int size)
 {
-  clearScreen();
-
   bool two_digit = (size >= 10);
 
   // Print column headers
