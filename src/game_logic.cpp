@@ -97,11 +97,17 @@ bool isEmptyHead(char board[][BOARD_N_MAX],
                  int y,
                  const char symbol)
 {
-  // TODO: checking empty head, using for checkWin
-  // An empty head can be:
   // - on board boundary
+  if (x < 0 || x >= size || y < 0 || y >= size)
+    return true;
+
   // - is empty symbol ('-')
+  if (board[x][y] == '-')
+    return true;
+
   // - equal to current symbol
+  if (board[x][y] == symbol)
+    return true;
 
   return false;
 }
@@ -139,6 +145,26 @@ bool checkWin(char board[][BOARD_N_MAX],
               const int goal,
               EndRule rule)
 {
+  static int streak[BOARD_N_MAX];
+
+  // Check horizontal
+  for (int i = 0; i < size; i++)
+    streak[i] = (board[i][0] == symbol) ? 1 : 0;
+
+  for (int j = 1; j < size; j++)
+    for (int i = 0; i < size; i++)
+    {
+      if (board[i][j] != symbol)
+      {
+        streak[i] = 0;
+        continue;
+      }
+
+      streak[i]++;
+      if (streak[i] >= goal && isEmptyHead(board, size, i, j - goal, symbol) && isEmptyHead(board, size, i, j + 1, symbol))
+        return true;
+    }
+
   return false;
 }
 
@@ -254,7 +280,7 @@ pII random_pick(char board[][BOARD_N_MAX],
                 const int size)
 {
   int row, col;
-  
+
   do
   {
     row = rand() % size;

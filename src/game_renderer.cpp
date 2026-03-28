@@ -236,7 +236,13 @@ void showInvalidMove()
  */
 void showResult(const int winner, const bool is_bot)
 {
-  // TODO:
+  if (winner == 0)
+  {
+    std::cout << "It's a draw!\n";
+    return;
+  }
+
+  std::cout << (is_bot ? std::format("Bot (Player {}) wins!", winner) : std::format("Player {} wins!", winner)) << '\n';
 }
 
 /**
@@ -253,6 +259,5 @@ void showResult(const int winner, const bool is_bot)
  */
 void printResult(const GameResult &gameResult)
 {
-  // used for non-interactive mode
-  // TODO:
+  std::cout << gameResult.winner << ' ' << gameResult.isBot << '\n';
 }

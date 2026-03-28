@@ -144,6 +144,8 @@ GameResult playGame(const RunConfig &config,
   // 2. Main game loop
   while (true)
   {
+    turns++;
+
     clearScreen();
     displayBoard(gameSetup.board, gameSetup.size);
 
@@ -168,7 +170,7 @@ GameResult playGame(const RunConfig &config,
                            gameSetup.levels[currentPlayer]);
           },
           true);
-      
+
       row = botMoveResult.first;
       col = botMoveResult.second;
     }
@@ -180,53 +182,25 @@ GameResult playGame(const RunConfig &config,
     }
 
     makeMove(gameSetup.board, row, col, symbols[currentPlayer]);
+
+    if (checkWin(gameSetup.board, gameSetup.size, symbols[currentPlayer], gameSetup.goal))
+    {
+      result.winner = currentPlayer;
+      result.isBot = isBot;
+      result.turns = turns;
+      break;
+    }
+
+    if (checkDraw(gameSetup.board, gameSetup.size))
+    {
+      result.winner = -1;
+      result.isBot = false;
+      result.turns = turns;
+      break;
+    }
+
     currentPlayer = 1 - currentPlayer;
   }
-
-  // while(true)
-
-  //      a) display board
-  //      displayBoard(...)
-
-  //      b) determine if player is human or bot
-
-  //      c) get move
-  //         human -> getPlayerMove()
-  //         bot   -> botMove()
-
-  //         log bot runtime -> measureExecutionTime()
-
-  // // Running Bot Move with meansure runtime
-  // pII point = measureExecutionTime(
-  //     "botMove",
-  //     [&]() {
-  //         return botMove(gameSetup.board,
-  //                        gameSetup.size,
-  //                        gameSetup.goal,
-  //                        symbols[player],
-  //                        gameSetup.levels[player]);
-  //     },
-  //     TIME_ENABLED);
-
-  //      d) validate move
-  //         isValidMove(...)
-
-  //      e) apply move
-  //         makeMove(...)
-
-  //      f) check win
-  //         checkWin(...)
-
-  //      g) check draw
-  //         checkDraw(...)
-
-  //      h) switch player
-  //         currentPlayer = 1 - currentPlayer
-
-  // 3. fill GameResult structure
-  // result.winner
-  // result.turns
-  // result.isBot
 
   return result;
 }
@@ -235,21 +209,14 @@ void endGame(const RunConfig &config,
              GameSetup &gameSetup,
              GameResult &gameResult)
 {
-  // TODO:
-  // 1. If interactive mode
-  //      clear screen
-  //      display final board
-  //      show result
-
-  // Example:
-  // clearScreen();
-  // displayBoard(gameSetup.board, gameSetup.size);
-  // showResult(gameResult.winner, gameResult.isBot);
-
-  // 2. If judge mode
-  //      print minimal result
-  // Example:
-  // printResult(gameResult);
-
-  // 3. (optional) log result using GameLogger
+  if (config.interactive)
+  {
+    clearScreen();
+    displayBoard(gameSetup.board, gameSetup.size);
+    showResult(gameResult.winner + 1, gameResult.isBot);
+  }
+  else if (config.judge_mode)
+  {
+    printResult(gameResult);
+  }
 }
