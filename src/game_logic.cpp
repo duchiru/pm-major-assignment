@@ -145,25 +145,111 @@ bool checkWin(char board[][BOARD_N_MAX],
               const int goal,
               EndRule rule)
 {
-  static int streak[BOARD_N_MAX];
-
   // Check horizontal
-  for (int i = 0; i < size; i++)
-    streak[i] = (board[i][0] == symbol) ? 1 : 0;
+  for (int i = 1; i < size; i++)
+  {
+    int cnt = 0;
+    for (int j = 0; j < size; j++)
+    {
+      if (board[i][j] != symbol)
+      {
+        cnt = 0;
+        continue;
+      }
 
+      cnt++;
+      if (cnt >= goal && isEmptyHead(board, size, i, j - goal, symbol) && isEmptyHead(board, size, i, j + 1, symbol))
+        return true;
+    }
+  }
+
+  // Check vertical
   for (int j = 1; j < size; j++)
+  {
+    int cnt = 0;
     for (int i = 0; i < size; i++)
     {
       if (board[i][j] != symbol)
       {
-        streak[i] = 0;
+        cnt = 0;
         continue;
       }
 
-      streak[i]++;
-      if (streak[i] >= goal && isEmptyHead(board, size, i, j - goal, symbol) && isEmptyHead(board, size, i, j + 1, symbol))
+      cnt++;
+      if (cnt >= goal && isEmptyHead(board, size, i - goal, j, symbol) && isEmptyHead(board, size, i + 1, j, symbol))
         return true;
     }
+  }
+
+  // Check main diagonal
+  for (int sj = 0; sj < size; sj++)
+  {
+    int cnt = 0;
+    for (int i = 0, j = sj; i < size && j < size; i++, j++)
+    {
+      if (board[i][j] != symbol)
+      {
+        cnt = 0;
+        continue;
+      }
+
+      cnt++;
+      if (cnt >= goal && isEmptyHead(board, size, i - goal, j - goal, symbol) && isEmptyHead(board, size, i + 1, j + 1, symbol))
+        return true;
+    }
+  }
+
+  for (int si = 1; si < size; si++)
+  {
+    int cnt = 0;
+    for (int i = si, j = 0; i < size && j < size; i++, j++)
+    {
+      if (board[i][j] != symbol)
+      {
+        cnt = 0;
+        continue;
+      }
+
+      cnt++;
+      if (cnt >= goal && isEmptyHead(board, size, i - goal, j - goal, symbol) && isEmptyHead(board, size, i + 1, j + 1, symbol))
+        return true;
+    }
+  }
+
+  // Check anti diagonal
+  for (int sj = 0; sj < size; sj++)
+  {
+    int cnt = 0;
+    for (int i = 0, j = sj; i < size && j >= 0; i++, j--)
+    {
+      if (board[i][j] != symbol)
+      {
+        cnt = 0;
+        continue;
+      }
+
+      cnt++;
+      if (cnt >= goal && isEmptyHead(board, size, i - goal, j + goal, symbol) && isEmptyHead(board, size, i + 1, j - 1, symbol))
+        return true;
+    }
+  }
+
+  for (int si = 1; si < size; si++)
+  {
+    int cnt = 0;
+    for (int i = si, j = size - 1; i < size && j >= 0; i++, j--)
+    {
+      if (board[i][j] != symbol)
+      {
+        cnt = 0;
+        continue;
+      }
+
+      cnt++;
+      if (cnt >= goal && isEmptyHead(board, size, i - goal, j + goal, symbol) && isEmptyHead(board, size, i + 1, j - 1, symbol))
+        return true;
+    }
+  }
 
   return false;
 }
