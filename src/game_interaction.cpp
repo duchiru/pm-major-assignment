@@ -170,9 +170,10 @@ bool GameInteraction::getInput(int *val)
  * Hint:
  *   Use getInput() and check range.
  */
-bool GameInteraction::selectSize(int *size)
+bool GameInteraction::selectSize(int *size, int interactive)
 {
-  std::cout << "\t+ Enter N: ";
+  if (interactive)
+    std::cout << "\t+ Enter N: ";
 
   int inp;
   if (GameInteraction::getInput(&inp) && inp >= 3 && inp <= BOARD_N_MAX)
@@ -202,9 +203,10 @@ bool GameInteraction::selectSize(int *size)
  *   true  -> valid selection
  *   false -> invalid selection
  */
-bool GameInteraction::selectGoal(int *goal, const int size)
+bool GameInteraction::selectGoal(int *goal, const int size, int interactive)
 {
-  std::cout << "\t+ Enter G: ";
+  if (interactive)
+    std::cout << "\t+ Enter G: ";
 
   int inp;
   if (GameInteraction::getInput(&inp) && inp >= 3 && inp <= size)
@@ -232,9 +234,10 @@ bool GameInteraction::selectGoal(int *goal, const int size)
  *   true  -> valid choice
  *   false -> invalid input
  */
-bool GameInteraction::selectGameMode(GameMode *mode)
+bool GameInteraction::selectGameMode(GameMode *mode, int interactive)
 {
-  std::cout << "\t+ Enter game mode: ";
+  if (interactive)
+    std::cout << "\t+ Enter game mode: ";
 
   int inp;
   if (GameInteraction::getInput(&inp))
@@ -286,16 +289,18 @@ bool GameInteraction::selectGameMode(GameMode *mode)
  *   - Bot vs Bot -> index in [0, 1]
  *
  */
-bool GameInteraction::selectBotLevel(BotLevel *levels, int index)
+bool GameInteraction::selectBotLevel(BotLevel *levels, int index, int interactive)
 {
   if (index == -1)
   { // PVE
-    std::cout << "\t+ Enter bot difficulty: ";
+    if (interactive)
+      std::cout << "\t+ Enter bot difficulty: ";
     index = 0; // default to bot 1 for PvE
   }
   else
   { // EVE
-    std::cout << std::format("\t+ Enter bot {} difficulty: ", index + 1);
+    if (interactive)
+      std::cout << std::format("\t+ Enter bot {} difficulty: ", index + 1);
   }
 
   int inp;
@@ -350,9 +355,10 @@ bool GameInteraction::selectBotLevel(BotLevel *levels, int index)
  * 0 0 -> top-left corner
  *
  */
-bool GameInteraction::getPlayerMove(int *row, int *col)
+bool GameInteraction::getPlayerMove(int *row, int *col, int interactive)
 {
-  std::cout << "\t+ Enter your move (row col): ";
+  if (interactive)
+    std::cout << "\t+ Enter your move (row col): ";
 
   return (GameInteraction::getInput(row) && GameInteraction::getInput(col));
 }

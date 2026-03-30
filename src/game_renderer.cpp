@@ -259,5 +259,5 @@ void showResult(const int winner, const bool is_bot)
  */
 void printResult(const GameResult &gameResult)
 {
-  std::cout << gameResult.winner << ' ' << gameResult.isBot << '\n';
+  std::cout << gameResult.winner << ' ' << gameResult.turns << '\n';
 }

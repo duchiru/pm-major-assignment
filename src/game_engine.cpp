@@ -49,39 +49,45 @@ void startGame(const RunConfig &config,
     clearScreen();
 
   // 2. Show game title
-  showSelectMenu(SelectType::TITLE_UI, gameSetup);
+  if (config.interactive)
+    showSelectMenu(SelectType::TITLE_UI, gameSetup);
 
   // 3. Ask user for board size
   // repeat until valid:
-  showSelectMenu(SelectType::SIZE_UI, gameSetup);
-  while (!GameInteraction::selectSize(&gameSetup.size))
+  if (config.interactive)
+    showSelectMenu(SelectType::SIZE_UI, gameSetup);
+  while (!GameInteraction::selectSize(&gameSetup.size, config.interactive))
     std::cout << std::format("\t+ Invalid N. Please enter a number between 3 and {}.\n", BOARD_N_MAX);
 
   // 4. Ask user for win condition (goal)
-  showSelectMenu(SelectType::GOAL_UI, gameSetup);
-  while (!GameInteraction::selectGoal(&gameSetup.goal, gameSetup.size))
+  if (config.interactive)
+    showSelectMenu(SelectType::GOAL_UI, gameSetup);
+  while (!GameInteraction::selectGoal(&gameSetup.goal, gameSetup.size, config.interactive))
     std::cout << std::format("\t+ Invalid G. Please enter a number between 3 and {}.\n", gameSetup.size);
 
   // 5. Ask for game mode
-  showSelectMenu(SelectType::GAME_MODE_UI, gameSetup);
-  while (!GameInteraction::selectGameMode(&gameSetup.mode))
+  if (config.interactive)
+    showSelectMenu(SelectType::GAME_MODE_UI, gameSetup);
+  while (!GameInteraction::selectGameMode(&gameSetup.mode, config.interactive))
     std::cout << "\t+ Invalid mode. Please enter 1, 2, or 3.\n";
 
   // 6. If mode == PVE, ask bot difficulty for player 2
   if (gameSetup.mode == GameMode::PVE)
   {
-    showSelectMenu(SelectType::BOT_LEVEL_UI, gameSetup);
-    while (!GameInteraction::selectBotLevel(gameSetup.levels, -1))
+    if (config.interactive)
+      showSelectMenu(SelectType::BOT_LEVEL_UI, gameSetup);
+    while (!GameInteraction::selectBotLevel(gameSetup.levels, -1, config.interactive))
       std::cout << "\t+ Invalid level. Please enter 1, 2, or 3.\n";
   }
 
   // 7. If mode == EVE, ask bot difficulty for both bots
   if (gameSetup.mode == GameMode::EVE)
   {
-    showSelectMenu(SelectType::BOT_LEVEL_UI, gameSetup);
-    while (!GameInteraction::selectBotLevel(gameSetup.levels, 0))
+    if (config.interactive)
+      showSelectMenu(SelectType::BOT_LEVEL_UI, gameSetup);
+    while (!GameInteraction::selectBotLevel(gameSetup.levels, 0, config.interactive))
       std::cout << "\t+ Invalid level. Please enter 1, 2, or 3.\n";
-    while (!GameInteraction::selectBotLevel(gameSetup.levels, 1))
+    while (!GameInteraction::selectBotLevel(gameSetup.levels, 1, config.interactive))
       std::cout << "\t+ Invalid level. Please enter 1, 2, or 3.\n";
   }
 
@@ -146,14 +152,20 @@ GameResult playGame(const RunConfig &config,
   {
     turns++;
 
-    clearScreen();
-    displayBoard(gameSetup.board, gameSetup.size);
+    GameLogger::log(std::format("It's turn {} for player {}'s move", turns, currentPlayer + 1), GameLogger::Level::INFO);
+
+    if (config.interactive)
+    {
+      clearScreen();
+      displayBoard(gameSetup.board, gameSetup.size);
+    }
 
     // Determine player type for current turn
     bool isBot = (gameSetup.mode == GameMode::EVE) ||
                  (gameSetup.mode == GameMode::PVE && currentPlayer == 1);
 
-    showPlayer(currentPlayer + 1, isBot);
+    if (config.interactive)
+      showPlayer(currentPlayer + 1, isBot);
 
     int row, col;
 
@@ -176,8 +188,10 @@ GameResult playGame(const RunConfig &config,
     }
     else
     {
-      showSelectMenu(SelectType::PLAYER_UI, gameSetup);
-      while (!GameInteraction::getPlayerMove(&row, &col) || !isValidMove(gameSetup.board, gameSetup.size, row, col))
+      if (config.interactive)
+        showSelectMenu(SelectType::PLAYER_UI, gameSetup);
+
+      while (!GameInteraction::getPlayerMove(&row, &col, config.interactive) || !isValidMove(gameSetup.board, gameSetup.size, row, col))
         std::cout << "\t+ Invalid move. Please try again.\n";
     }
 
