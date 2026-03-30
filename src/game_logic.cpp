@@ -146,7 +146,7 @@ bool checkWin(char board[][BOARD_N_MAX],
               EndRule rule)
 {
   // Check horizontal
-  for (int i = 1; i < size; i++)
+  for (int i = 0; i < size; i++)
   {
     int cnt = 0;
     for (int j = 0; j < size; j++)
@@ -164,7 +164,7 @@ bool checkWin(char board[][BOARD_N_MAX],
   }
 
   // Check vertical
-  for (int j = 1; j < size; j++)
+  for (int j = 0; j < size; j++)
   {
     int cnt = 0;
     for (int i = 0; i < size; i++)
