@@ -145,30 +145,30 @@ void showSelectMenu(SelectType selectType, GameSetup &currentGameSetup)
  */
 void displayBoard(const char board[][BOARD_N_MAX], const int size)
 {
-  bool two_digit = (size >= 10);
-
-  // Print column headers
-  std::cout << "  ";
-  for (int j = 0; j < size; ++j)
-    std::cout << j << " ";
+  std::cout << "   ";
+  for(int i = 0; i < size; i++) std::cout << "\033[46;30m" << (i / 10) << "\033[0m" << ' ';
   std::cout << '\n';
 
-  std::cout << " *";
-  for (int j = 0; j < size * 2 - 1; ++j)
-    std::cout << '=';
+  std::cout << "   ";
+  for(int i = 0; i < size; i++) std::cout << "\033[46;30m" << (i % 10) << "\033[0m" << ' ';
+  std::cout << '\n';
+
+  std::cout << "  *";
+  for(int i = 0; i < size * 2 - 1; i++) std::cout << '=';
   std::cout << "*\n";
 
-  for (int i = 0; i < size; ++i)
+  for(int i = 0; i < size; i++)
   {
-    std::cout << std::format("{}|", i);
-    for (int j = 0; j < size; ++j)
-      std::cout << board[i][j] << (j < size - 1 ? " " : "");
+    std::cout << "\033[46;30m" << std::format("{:02}", i) << "\033[0m" << "|";
+    for(int j = 0; j < size; j++) {
+      std::cout << board[i][j];
+      if (j < size - 1) std::cout << ' ';
+    }
     std::cout << "|\n";
   }
 
-  std::cout << " *";
-  for (int j = 0; j < size * 2 - 1; ++j)
-    std::cout << '=';
+  std::cout << "  *";
+  for(int i = 0; i < size * 2 - 1; i++) std::cout << '=';
   std::cout << "*\n";
 }
 
