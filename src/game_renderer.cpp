@@ -204,7 +204,7 @@ void showPlayer(int player, bool is_bot)
  */
 void showMove(const int row, const int col)
 {
-  // TODO:
+  std::cout << "Last move: (" << row << ", " << col << ")\n";
 }
 
 /**
@@ -217,7 +217,7 @@ void showMove(const int row, const int col)
  */
 void showInvalidMove()
 {
-  // TODO:
+  std::cout << "\t+ Invalid move. Please try again.\n";
 }
 
 /**

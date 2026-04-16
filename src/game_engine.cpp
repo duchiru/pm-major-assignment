@@ -143,22 +143,27 @@ GameResult playGame(const RunConfig &config,
   static const char symbols[2] = {'X', 'O'};
   GameResult result;
 
-  // TODO:
   int currentPlayer = 0;
   int turns = 0;
+
+  int row, col;
 
   // 2. Main game loop
   while (true)
   {
-    turns++;
-
-    GameLogger::log(std::format("It's turn {} for player {}'s move", turns, currentPlayer + 1), GameLogger::Level::INFO);
-
     if (config.interactive)
     {
       clearScreen();
       displayBoard(gameSetup.board, gameSetup.size);
     }
+
+    // Show previous move
+    if (turns > 0 && config.interactive)
+      showMove(row, col);
+
+    turns++;
+
+    GameLogger::log(std::format("It's turn {} for player {}'s move", turns, currentPlayer + 1), GameLogger::Level::INFO);
 
     // Determine player type for current turn
     bool isBot = (gameSetup.mode == GameMode::EVE) ||
@@ -166,8 +171,6 @@ GameResult playGame(const RunConfig &config,
 
     if (config.interactive)
       showPlayer(currentPlayer + 1, isBot);
-
-    int row, col;
 
     if (isBot)
     {
@@ -192,7 +195,7 @@ GameResult playGame(const RunConfig &config,
         showSelectMenu(SelectType::PLAYER_UI, gameSetup);
 
       while (!GameInteraction::getPlayerMove(&row, &col, config.interactive) || !isValidMove(gameSetup.board, gameSetup.size, row, col))
-        std::cout << "\t+ Invalid move. Please try again.\n";
+        showInvalidMove();
     }
 
     makeMove(gameSetup.board, row, col, symbols[currentPlayer]);
