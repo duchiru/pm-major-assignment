@@ -106,3 +106,4 @@ pII simple_heuristic(char board[][BOARD_N_MAX], const int size, const int goal, 
  * implemented without modifying the rest of the game logic.
  */
 pII hard_level(char board[][BOARD_N_MAX], const int size, const int goal, const char botSymbol, const char playerSymbol);
+void calcRewardOnBotSide(char board[][BOARD_N_MAX], const int size, const int goal, const char botSymbol, const char playerSymbol, int reward[][BOARD_N_MAX]);
