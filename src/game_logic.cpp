@@ -434,12 +434,19 @@ pII simple_heuristic(char board[][BOARD_N_MAX],
     }
   }
 
+  std::vector<pII> potential_moves;
+
   // 3. Prefer center
-  if (isValidMove(board, size, size / 2, size / 2))
-    return std::make_pair(size / 2, size / 2);
+  double center = (size - 1) / 2.0;
+  for (int x = std::floor(center); x <= std::ceil(center); x++)
+    for (int y = std::floor(center); y <= std::ceil(center); y++)
+      if (isValidMove(board, size, x, y))
+        potential_moves.push_back(std::make_pair(x, y));
+
+  if (!potential_moves.empty())
+    return potential_moves[rand() % potential_moves.size()];
 
   // 4. Prefer cells near existing pieces
-  std::vector<pII> potential_moves;
   for (int i = 0; i < size; i++)
   {
     for (int j = 0; j < size; j++)
@@ -475,9 +482,7 @@ pII simple_heuristic(char board[][BOARD_N_MAX],
   }
 
   if (!potential_moves.empty())
-  {
     return potential_moves[rand() % potential_moves.size()];
-  }
 
   // fallback
   return random_pick(board, size);
@@ -515,9 +520,11 @@ pII hard_level(char board[][BOARD_N_MAX],
   calcRewardOnBotSide(board, size, goal, botSymbol, playerSymbol, reward);
   calcRewardOnBotSide(board, size, goal, playerSymbol, botSymbol, reward);
 
-  int center = size / 2;
-  if (isValidMove(board, size, center, center))
-    reward[center][center] += 1;
+  double center = (size - 1) / 2.0;
+  for (int x = std::floor(center); x <= std::ceil(center); x++)
+    for (int y = std::floor(center); y <= std::ceil(center); y++)
+      if (isValidMove(board, size, x, y))
+        reward[x][y] += 1; // Bonus for center
 
   int best_reward = 0;
   for (int i = 0; i < size; i++)
@@ -557,8 +564,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
     {
       if (board[i][j] == '-' && cnt > 0)
       {
-        bool can_win = true; // Whether bot can win by extending this streak
-        for (int k = j + 1; k < std::min(j + (goal - cnt), size); k++)
+        bool can_win = true;                                              // Whether bot can win by extending this streak
+        can_win &= isEmptyHead(board, size, i, j - (cnt + 1), botSymbol); // Check the start of this streak
+        for (int k = j + 1; can_win && k < std::min(j + (goal - cnt), size); k++)
           can_win &= (board[i][k] != playerSymbol);
 
         if (can_win)
@@ -584,7 +592,8 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
-        for (int k = j - 1; k >= std::max(j - (goal - cnt), 0); k--)
+        can_win &= isEmptyHead(board, size, i, j + (cnt + 1), botSymbol);
+        for (int k = j - 1; can_win && k >= std::max(j - (goal - cnt), 0); k--)
           can_win &= (board[i][k] != playerSymbol);
 
         if (can_win)
@@ -610,7 +619,8 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
-        for (int k = i + 1; k < std::min(i + (goal - cnt), size); k++)
+        can_win &= isEmptyHead(board, size, i - (cnt + 1), j, botSymbol);
+        for (int k = i + 1; can_win && k < std::min(i + (goal - cnt), size); k++)
           can_win &= (board[k][j] != playerSymbol);
 
         if (can_win)
@@ -636,7 +646,8 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
-        for (int k = i - 1; k >= std::max(i - (goal - cnt), 0); k--)
+        can_win &= isEmptyHead(board, size, i + (cnt + 1), j, botSymbol);
+        for (int k = i - 1; can_win && k >= std::max(i - (goal - cnt), 0); k--)
           can_win &= (board[k][j] != playerSymbol);
 
         if (can_win)
@@ -662,8 +673,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i - (cnt + 1), j - (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i + k;
           int nj = j + k;
@@ -694,8 +706,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i - (cnt + 1), j - (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i + k;
           int nj = j + k;
@@ -727,8 +740,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i + (cnt + 1), j + (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i - k;
           int nj = j - k;
@@ -759,8 +773,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i + (cnt + 1), j + (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i - k;
           int nj = j - k;
@@ -792,8 +807,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i - (cnt + 1), j + (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i + k;
           int nj = j - k;
@@ -824,8 +840,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i - (cnt + 1), j + (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i + k;
           int nj = j - k;
@@ -857,8 +874,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i + (cnt + 1), j - (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i - k;
           int nj = j + k;
@@ -889,8 +907,9 @@ void calcRewardOnBotSide(char board[][BOARD_N_MAX],
       if (board[i][j] == '-' && cnt > 0)
       {
         bool can_win = true;
+        can_win &= isEmptyHead(board, size, i + (cnt + 1), j - (cnt + 1), botSymbol);
         int need = goal - cnt;
-        for (int k = 1; k < need; k++)
+        for (int k = 1; can_win && k < need; k++)
         {
           int ni = i - k;
           int nj = j + k;
