@@ -295,7 +295,7 @@ bool GameInteraction::selectBotLevel(BotLevel *levels, int index, int interactiv
   { // PVE
     if (interactive)
       std::cout << "\t+ Enter bot difficulty: ";
-    index = 0; // default to bot 1 for PvE
+    index = 1; // default to bot 2 for PvE
   }
   else
   { // EVE
