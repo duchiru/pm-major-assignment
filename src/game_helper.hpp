@@ -50,3 +50,14 @@ auto measureExecutionTime(const std::string &label, Function func, bool enabled)
         return result;
     }
 }
+
+inline void debugPotentialMoves(const std::vector<pII>& potential_moves)
+{
+  GameLogger::log("Potential moves count: " + std::to_string(potential_moves.size()), GameLogger::Level::DEBUG);
+
+  std::string move_list;
+  for (const auto &move : potential_moves)
+    move_list += " (" + std::to_string(move.first) + "," + std::to_string(move.second) + ")";
+
+  GameLogger::log("Potential moves: " + move_list, GameLogger::Level::DEBUG);
+}

@@ -1,5 +1,8 @@
 #include "game_logger.hpp"
 #include "game_logic.hpp"
+#include "game_helper.hpp"
+#include <thread>
+#include <chrono>
 
 /* ---------- Game Logic ---------- */
 /**
@@ -370,6 +373,7 @@ pII random_pick(char board[][BOARD_N_MAX],
     col = rand() % size;
   } while (!isValidMove(board, size, row, col));
 
+  GameLogger::log("Random selecting a move...", GameLogger::Level::DEBUG);
   return std::make_pair(row, col);
 }
 
@@ -443,9 +447,6 @@ pII simple_heuristic(char board[][BOARD_N_MAX],
       if (isValidMove(board, size, x, y))
         potential_moves.push_back(std::make_pair(x, y));
 
-  if (!potential_moves.empty())
-    return potential_moves[rand() % potential_moves.size()];
-
   // 4. Prefer cells near existing pieces
   for (int i = 0; i < size; i++)
   {
@@ -461,18 +462,16 @@ pII simple_heuristic(char board[][BOARD_N_MAX],
           {
             int ni = i + di;
             int nj = j + dj;
-            if (ni >= 0 && ni < size && nj >= 0 && nj < size)
-            {
-              if (board[ni][nj] != '-')
-              {
-                adjacent_existed_move = true;
-                break;
-              }
-            }
+            adjacent_existed_move |= (ni >= 0 && ni < size && nj >= 0 && nj < size && board[ni][nj] != '-');
+
+            if (adjacent_existed_move)
+              break;
           }
+
           if (adjacent_existed_move)
             break;
         }
+
         if (adjacent_existed_move)
         {
           potential_moves.push_back(std::make_pair(i, j));
@@ -481,11 +480,12 @@ pII simple_heuristic(char board[][BOARD_N_MAX],
     }
   }
 
-  if (!potential_moves.empty())
-    return potential_moves[rand() % potential_moves.size()];
+  debugPotentialMoves(potential_moves);
+  return potential_moves[rand() % potential_moves.size()];
 
-  // fallback
-  return random_pick(board, size);
+  // // fallback
+  // GameLogger::log("No heuristic move found, fallback to random...", GameLogger::Level::DEBUG);
+  // return random_pick(board, size);
 }
 
 // Level 3
@@ -538,13 +538,7 @@ pII hard_level(char board[][BOARD_N_MAX],
         potential_moves.push_back(std::make_pair(i, j));
 
   GameLogger::log("Max reward: " + std::to_string(best_reward), GameLogger::Level::DEBUG);
-  GameLogger::log("Potential moves count: " + std::to_string(potential_moves.size()), GameLogger::Level::DEBUG);
-
-  std::string move_list;
-  for (const auto &move : potential_moves)
-    move_list += " (" + std::to_string(move.first) + "," + std::to_string(move.second) + ")";
-
-  GameLogger::log("Potential moves: " + move_list, GameLogger::Level::DEBUG);
+  debugPotentialMoves(potential_moves);
 
   return potential_moves[rand() % potential_moves.size()];
 }

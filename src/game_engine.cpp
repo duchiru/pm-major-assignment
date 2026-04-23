@@ -1,5 +1,7 @@
 #include <format>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "game_engine.hpp"
 #include "game_interaction.hpp"
@@ -185,7 +187,9 @@ GameResult playGame(const RunConfig &config,
                            gameSetup.levels[currentPlayer]);
           },
           true);
-
+      
+      std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME)); // Add a small delay for better UX
+      
       row = botMoveResult.first;
       col = botMoveResult.second;
     }
