@@ -86,7 +86,7 @@ void startGame(const RunConfig &config,
   if (gameSetup.mode == GameMode::EVE)
   {
     if (config.interactive)
-      showSelectMenu(SelectType::BOT_LEVEL_UI, gameSetup);
+      showSelectMenu(SelectType::MUL_BOT_LEVEL_UI, gameSetup);
     while (!GameInteraction::selectBotLevel(gameSetup.levels, 0, config.interactive))
       std::cout << "\t+ Invalid level. Please enter 1, 2, or 3.\n";
     while (!GameInteraction::selectBotLevel(gameSetup.levels, 1, config.interactive))

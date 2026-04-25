@@ -107,8 +107,7 @@ void showSelectMenu(SelectType selectType, GameSetup &currentGameSetup)
     break;
 
   case SelectType::MUL_BOT_LEVEL_UI:
-    // TODO: display multiple bot level selection
-    // Example input format: "(bot1_level, bot2_level)"
+    std::cout << "- Select difficulty for bot 1 and bot 2 respectively [(1) EASY | (2) MEDIUM | (3) HARD]\n";
     break;
 
   default:
