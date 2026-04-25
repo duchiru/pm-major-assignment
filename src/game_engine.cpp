@@ -204,7 +204,7 @@ GameResult playGame(const RunConfig &config,
 
     makeMove(gameSetup.board, row, col, symbols[currentPlayer]);
 
-    if (checkWin(gameSetup.board, gameSetup.size, symbols[currentPlayer], gameSetup.goal))
+    if (checkWin(gameSetup.board, gameSetup.size, symbols[currentPlayer], gameSetup.goal, EndRule::OPEN_TWO))
     {
       result.winner = currentPlayer;
       result.isBot = isBot;
