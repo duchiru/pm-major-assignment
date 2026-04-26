@@ -203,7 +203,7 @@ void showPlayer(int player, bool is_bot)
  */
 void showMove(const int row, const int col)
 {
-  std::cout << "Last move: (" << row << ", " << col << ")\n";
+  std::cout << "Last move placed at (" << row << ", " << col << ")\n";
 }
 
 /**
