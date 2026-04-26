@@ -202,6 +202,7 @@ GameResult playGame(const RunConfig &config,
         showInvalidMove();
     }
 
+    GameLogger::log(std::format("Player {} chooses move ({}, {})", currentPlayer + 1, row, col), GameLogger::Level::INFO);
     makeMove(gameSetup.board, row, col, symbols[currentPlayer]);
 
     if (checkWin(gameSetup.board, gameSetup.size, symbols[currentPlayer], gameSetup.goal, EndRule::OPEN_TWO))
