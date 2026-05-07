@@ -35,7 +35,8 @@
  * Tác dụng phụ:
  *   - Gán con trỏ để sử dụng trong toàn bộ vòng đời engine
  */
-Engine::Engine(const RunConfig* _config, I_Renderer* _iRenderer, I_Interaction* _iInteraction) {
+Engine::Engine(const RunConfig *_config, I_Renderer *_iRenderer, I_Interaction *_iInteraction)
+{
     config = _config;
     iRenderer = _iRenderer;
     iInteraction = _iInteraction;
@@ -54,7 +55,8 @@ Engine::Engine(const RunConfig* _config, I_Renderer* _iRenderer, I_Interaction* 
  * Tác dụng phụ:
  *   - Hiện tại chưa xử lý gì (cleanup ở nơi khác)
  */
-Engine::~Engine() {
+Engine::~Engine()
+{
 }
 
 /**
@@ -70,11 +72,12 @@ Engine::~Engine() {
  * Tác dụng phụ:
  *   - Gọi init() của renderer và interaction
  */
-void Engine::init() {
+void Engine::init()
+{
     Logger::log("Engine initializing . . .");
 
-    iRenderer->init(*config);     // khởi tạo renderer theo config
-    iInteraction->init(*config);  // khởi tạo interaction theo config
+    iRenderer->init(*config);    // khởi tạo renderer theo config
+    iInteraction->init(*config); // khởi tạo interaction theo config
 
     Logger::log("Engine initialized!");
 }
@@ -92,14 +95,17 @@ void Engine::init() {
  * Tác dụng phụ:
  *   - Ghi log cảnh báo nếu thiếu renderer/interaction
  */
-bool Engine::sanity_check() {
+bool Engine::sanity_check()
+{
     bool isRendererGood = iRenderer;
-    if (!isRendererGood) {
+    if (!isRendererGood)
+    {
         Logger::log("Interface Renderer is not implemented!", Logger::Level::WARNING);
     }
 
     bool isInteractionGood = iInteraction;
-    if (!isInteractionGood) {
+    if (!isInteractionGood)
+    {
         Logger::log("Interface Interaction is not implemented!", Logger::Level::WARNING);
     }
 
@@ -122,15 +128,18 @@ bool Engine::sanity_check() {
  *   - Thay đổi gameSetup
  *   - Gọi render và interaction
  */
-void Engine::startGame() {
+void Engine::startGame()
+{
     Logger::log("[Engine] Starting game . . .");
 
-    if (!sanity_check()) {
+    if (!sanity_check())
+    {
         Logger::log("[Engine] Game stopped!", Logger::Level::ERROR);
         return;
     }
 
-    if (config->interactive) {
+    if (config->interactive)
+    {
         iRenderer->clearScreen();
         iRenderer->showSelectMenu(SelectType::TITLE_UI);
         iInteraction->pause();
@@ -139,7 +148,8 @@ void Engine::startGame() {
     bool isSlected;
 
     // chọn kích thước bàn cờ
-    do {
+    do
+    {
         if (config->interactive)
             iRenderer->showSelectMenu(SelectType::SIZE_UI);
         isSlected = iInteraction->selectSize(&gameSetup.size);
@@ -154,7 +164,8 @@ void Engine::startGame() {
     Logger::log(std::format("user input 'size' = {}", gameSetup.size), Logger::Level::DEBUG);
 
     // chọn điều kiện thắng (goal)
-    do {
+    do
+    {
         if (config->interactive)
             iRenderer->showSelectMenu(SelectType::GOAL_UI, gameSetup.size);
         isSlected = iInteraction->selectGoal(&gameSetup.goal, gameSetup.size);
@@ -169,7 +180,8 @@ void Engine::startGame() {
     Logger::log(std::format("user input 'goal' = {}", gameSetup.goal), Logger::Level::DEBUG);
 
     // chọn mode chơi
-    do {
+    do
+    {
         if (config->interactive)
             iRenderer->showSelectMenu(SelectType::GAME_MODE_UI);
         isSlected = iInteraction->selectGameMode(&gameSetup.mode);
@@ -184,8 +196,10 @@ void Engine::startGame() {
     Logger::log(std::format("user input 'game mode' = {}", modeToString((int)gameSetup.mode)), Logger::Level::DEBUG);
 
     // mode Player vs Bot
-    if (gameSetup.mode == GameMode::PVE) {
-        do {
+    if (gameSetup.mode == GameMode::PVE)
+    {
+        do
+        {
             if (config->interactive)
                 iRenderer->showSelectMenu(SelectType::BOT_LEVEL_UI);
             isSlected = iInteraction->selectBotLevel(gameSetup.levels, 1);
@@ -201,9 +215,11 @@ void Engine::startGame() {
     }
 
     // mode Bot vs Bot
-    if (gameSetup.mode == GameMode::EVE) {
+    if (gameSetup.mode == GameMode::EVE)
+    {
         // bot 0
-        do {
+        do
+        {
             if (config->interactive)
                 iRenderer->showSelectMenu(SelectType::MUL_BOT_LEVEL_UI, 0);
             isSlected = iInteraction->selectBotLevel(gameSetup.levels, 0);
@@ -219,7 +235,8 @@ void Engine::startGame() {
         Logger::log(std::format("user input 'bot level[0]' = {}", botToString((int)gameSetup.levels[0])), Logger::Level::DEBUG);
 
         // bot 1
-        do {
+        do
+        {
             if (config->interactive)
                 iRenderer->showSelectMenu(SelectType::MUL_BOT_LEVEL_UI, 1);
             isSlected = iInteraction->selectBotLevel(gameSetup.levels, 1);
@@ -259,12 +276,14 @@ void Engine::startGame() {
  * Tác dụng phụ:
  *   - Thay đổi trạng thái board liên tục
  */
-GameResult Engine::playGame() {
+GameResult Engine::playGame()
+{
     Logger::log("[Engine] Playing game . . .");
 
     GameResult gameResult = GameResult(-1, false, 0);
 
-    if (!sanity_check()) {
+    if (!sanity_check())
+    {
         Logger::log("[Engine] Game stopped!", Logger::Level::ERROR);
         return gameResult;
     }
@@ -283,37 +302,46 @@ GameResult Engine::playGame() {
     bots.clear();
 
     // khởi tạo bot theo mode
-    if (gameSetup.mode == GameMode::PVE) {
-        bots.emplace_back(std::unique_ptr<Bot>(nullptr));  // player 0 là human
+    if (gameSetup.mode == GameMode::PVE)
+    {
+        bots.emplace_back(std::unique_ptr<Bot>(nullptr)); // player 0 là human
         bots.emplace_back(std::unique_ptr<Bot>(
             BotFactory::createBot(gameSetup.levels[1], symbols[1])));
-    } else if (gameSetup.mode == GameMode::EVE) {
+    }
+    else if (gameSetup.mode == GameMode::EVE)
+    {
         bots.emplace_back(std::unique_ptr<Bot>(
             BotFactory::createBot(gameSetup.levels[0], symbols[0])));
         bots.emplace_back(std::unique_ptr<Bot>(
             BotFactory::createBot(gameSetup.levels[1], symbols[1])));
     }
 
-    int player = 0;  // X đi trước
+    int player = 0; // X đi trước
 
     // Game Loop
-    while (is_running) {
+    while (is_running)
+    {
         Logger::log(
             std::format("[Engine] starting turn #{}", gameResult.turns), Logger::Level::DEBUG);
 
         // render board
-        if (config->interactive) iRenderer->clearScreen();
-        if (config->interactive) iRenderer->displayBoard(gameSetup.board, gameSetup.size);
+        if (config->interactive)
+            iRenderer->clearScreen();
+        if (config->interactive)
+            iRenderer->displayBoard(gameSetup.board, gameSetup.size);
 
         // hiển thị player hiện tại
-        if (config->interactive) iRenderer->showPlayer(player, is_bot[player]);
+        if (config->interactive)
+            iRenderer->showPlayer(player, is_bot[player]);
 
         // 1. Get Move
-        if (is_bot[player]) {
+        if (is_bot[player])
+        {
             // NOTE: đo thời gian thực thi bot
             pII point = measureExecutionTime(
                 std::format("bot#{}->getMove()", player),
-                [&]() {
+                [&]()
+                {
                     return bots[player]->getMove(
                         gameSetup.board,
                         gameSetup.size,
@@ -323,23 +351,30 @@ GameResult Engine::playGame() {
 
             row = point.first;
             col = point.second;
-        } else {
+        }
+        else
+        {
             // human input
             bool is_valid = true;
-            do {
-                if (config->interactive) iRenderer->showSelectMenu(SelectType::PLAYER_UI);
+            do
+            {
+                if (config->interactive)
+                    iRenderer->showSelectMenu(SelectType::PLAYER_UI);
                 iInteraction->getPlayerMove(&row, &col);
                 is_valid = Logic::isValidMove(gameSetup.board, gameSetup.size, row, col);
 
-                if (!is_valid) {
-                    if (config->interactive) iRenderer->showInvalidMove();
+                if (!is_valid)
+                {
+                    if (config->interactive)
+                        iRenderer->showInvalidMove();
                 }
             } while (!is_valid);
         }
 
         // 2. Make move
         Logic::makeMove(gameSetup.board, row, col, symbols[player]);
-        if (config->interactive) iRenderer->showMove(row, col);
+        if (config->interactive)
+            iRenderer->showMove(row, col);
         gameResult.turns += 1;
 
         std::stringstream ss;
@@ -347,16 +382,20 @@ GameResult Engine::playGame() {
         Logger::log(ss.str(), Logger::Level::DEBUG);
 
         // delay khi bot chơi để dễ quan sát
-        if (is_bot[player] and config->interactive) {
+        if (is_bot[player] and config->interactive)
+        {
             std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
         }
 
         // 3. Check result
-        if (Logic::checkWin(gameSetup.board, gameSetup.size, symbols[player], gameSetup.goal)) {
+        if (Logic::checkWin(gameSetup.board, gameSetup.size, symbols[player], gameSetup.goal))
+        {
             gameResult.winner = player;
             gameResult.isBot = is_bot[player];
             is_running = false;
-        } else if (Logic::checkDraw(gameSetup.board, gameSetup.size)) {
+        }
+        else if (Logic::checkDraw(gameSetup.board, gameSetup.size))
+        {
             gameResult.winner = -1;
             gameResult.isBot = false;
             is_running = false;
@@ -388,15 +427,18 @@ GameResult Engine::playGame() {
  * Tác dụng phụ:
  *   - Render UI và log
  */
-void Engine::endGame(const GameResult& gameResult) {
+void Engine::endGame(const GameResult &gameResult)
+{
     Logger::log("[Engine] Ending game . . .");
 
-    if (!sanity_check()) {
+    if (!sanity_check())
+    {
         Logger::log("[Engine] Game stopped!", Logger::Level::ERROR);
         return;
     }
 
-    if (config->interactive) {
+    if (config->interactive)
+    {
         iRenderer->clearScreen();
         iRenderer->displayBoard(gameSetup.board, gameSetup.size);
 
@@ -405,20 +447,25 @@ void Engine::endGame(const GameResult& gameResult) {
         // NOTE: lấy danh sách ô tạo thành đường thắng
         auto winLine = Logic::getWinLine(gameSetup.board, gameSetup.size, symbol, gameSetup.goal);
 
-        if (winLine) {
+        if (winLine)
+        {
             std::string s = "[WinLine] cells: ";
             for (auto [r, c] : winLine->cells)
                 s += std::format("({}, {}) ", r, c);
 
             Logger::log(s, Logger::Level::DEBUG);
-        } else {
+        }
+        else
+        {
             Logger::log("[WinLine] none", Logger::Level::DEBUG);
         }
 
         // hiển thị kết quả cuối cùng
         iRenderer->showResult(gameResult.winner, gameResult.isBot, winLine ? &(*winLine) : nullptr);
         iInteraction->pause();
-    } else if (config->judge_mode) {
+    }
+    else if (config->judge_mode)
+    {
         // mode judge (không interactive)
         iRenderer->printResult(gameResult);
     }
@@ -456,7 +503,8 @@ void Engine::endGame(const GameResult& gameResult) {
  * Tác dụng phụ:
  *   - Gọi close() của renderer và interaction
  */
-void Engine::close() {
+void Engine::close()
+{
     Logger::log("Engine closing . . .");
 
     iRenderer->close();

@@ -16,7 +16,8 @@
 
 /* ---------- Definitions ---------- */
 
-TerminalInteraction::TerminalInteraction() {
+TerminalInteraction::TerminalInteraction()
+{
 }
 
 /**
@@ -25,7 +26,8 @@ TerminalInteraction::TerminalInteraction() {
  * Đầu ra: Không.
  * Tác dụng phụ: Không.
  */
-TerminalInteraction::~TerminalInteraction() {
+TerminalInteraction::~TerminalInteraction()
+{
 }
 
 /**
@@ -34,7 +36,8 @@ TerminalInteraction::~TerminalInteraction() {
  * Đầu ra: Không.
  * Tác dụng phụ: Có thể redirect std::cin sang file input.
  */
-void TerminalInteraction::init(const RunConfig& config) {
+void TerminalInteraction::init(const RunConfig &config)
+{
     initInteraction(config);
 }
 
@@ -47,17 +50,22 @@ void TerminalInteraction::init(const RunConfig& config) {
  *   - Ghi log trạng thái.
  * NOTE: Nếu file không mở được, sẽ fallback về console.
  */
-void TerminalInteraction::initInteraction(const RunConfig& config) {
+void TerminalInteraction::initInteraction(const RunConfig &config)
+{
     cin_backup = nullptr;
 
-    if (!config.interactive && !config.input_file.empty()) {
+    if (!config.interactive && !config.input_file.empty())
+    {
         global_file_in.open(config.input_file);
-        if (global_file_in.is_open()) {
+        if (global_file_in.is_open())
+        {
             cin_backup = std::cin.rdbuf();
             std::cin.rdbuf(global_file_in.rdbuf());
 
             Logger::log(std::format("redirected cin to: {}", config.input_file));
-        } else {
+        }
+        else
+        {
             Logger::log("failed to open input file, using console.", Logger::Level::ERROR);
         }
     }
@@ -71,13 +79,16 @@ void TerminalInteraction::initInteraction(const RunConfig& config) {
  *   - Reset std::cin về buffer gốc.
  *   - Đóng file input.
  */
-void TerminalInteraction::closeInteraction() {
-    if (cin_backup) {
+void TerminalInteraction::closeInteraction()
+{
+    if (cin_backup)
+    {
         std::cin.rdbuf(cin_backup);
         Logger::log("fallback using 'std::cin' input stream.");
     }
 
-    if (global_file_in.is_open()) {
+    if (global_file_in.is_open())
+    {
         global_file_in.close();
     }
 }
@@ -92,12 +103,17 @@ void TerminalInteraction::closeInteraction() {
  *   - Bước 2: Duyệt từng ký tự và kiểm tra có phải số.
  *   - Trường hợp biên: input rỗng hoặc chứa ký tự đặc biệt.
  */
-bool TerminalInteraction::validateInput(const std::string& input) {
-    // TODO: Kiểm tra chuỗi rỗng
-    // TODO: Duyệt từng ký tự để đảm bảo toàn bộ là chữ số
-    // TODO: Trả về true nếu hợp lệ, ngược lại false
-    throw NotImplementedException();
-    return false;
+bool TerminalInteraction::validateInput(const std::string &input)
+{
+    for (char c : input)
+    {
+        if (!std::isdigit(c))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -111,13 +127,20 @@ bool TerminalInteraction::validateInput(const std::string& input) {
  *   - Bước 3: Chuyển sang số bằng stoi.
  *   - Trường hợp biên: input không phải số hoặc lỗi chuyển đổi.
  */
-bool TerminalInteraction::getInput(int* val) {
-    // TODO: Đọc dữ liệu dạng chuỗi từ std::cin
-    // TODO: Validate input
-    // TODO: Chuyển đổi sang int và gán vào *val
-    // TODO: Xử lý exception nếu có
-    throw NotImplementedException();
-    return false;
+bool TerminalInteraction::getInput(int *val)
+{
+    std::string s;
+
+    std::cin >> s;
+    Logger::log(std::format("[getInput] user entered: '{}'", s), Logger::Level::DEBUG);
+
+    if (!validateInput(s))
+    {
+        return false;
+    }
+
+    *val = std::stoi(s);
+    return true;
 }
 
 /**
@@ -130,10 +153,12 @@ bool TerminalInteraction::getInput(int* val) {
  *   - Bước 2: Nếu timeout > 0, sleep trong khoảng thời gian tương ứng.
  *   - Trường hợp biên: buffer input còn dữ liệu.
  */
-void TerminalInteraction::pause(int timeout) {
-    // TODO: Xử lý pause theo chế độ interactive hoặc delay
-    throw NotImplementedException();
-    return;
+void TerminalInteraction::pause(int timeout)
+{
+    if (timeout <= 0)
+        std::cin.get();
+    else
+        std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
 }
 
 /**
@@ -146,11 +171,15 @@ void TerminalInteraction::pause(int timeout) {
  *   - Bước 2: Kiểm tra nằm trong [BOARD_N_MIN, BOARD_N_MAX].
  *   - Trường hợp biên: giá trị ngoài phạm vi.
  */
-bool TerminalInteraction::selectSize(int* size) {
-    // TODO: Đọc input size
-    // TODO: Validate range hợp lệ
-    throw NotImplementedException();
-    return false;
+bool TerminalInteraction::selectSize(int *size)
+{
+    if (!getInput(size))
+        return false;
+
+    if (*size < BOARD_N_MIN || *size > BOARD_N_MAX)
+        return false;
+
+    return true;
 }
 
 /**
@@ -163,11 +192,17 @@ bool TerminalInteraction::selectSize(int* size) {
  *   - Bước 2: Kiểm tra goal >= 3 và <= size.
  *   - Trường hợp biên: goal không hợp lệ.
  */
-bool TerminalInteraction::selectGoal(int* goal, const int size) {
-    // TODO: Đọc input goal
-    // TODO: Validate điều kiện goal
-    throw NotImplementedException();
-    return false;
+bool TerminalInteraction::selectGoal(int *goal, const int size)
+{
+    int max_goal = std::min(size, GOAL_MAX);
+
+    if (!getInput(goal))
+        return false;
+
+    if (*goal < BOARD_N_MIN || *goal > max_goal)
+        return false;
+
+    return true;
 }
 
 /**
@@ -180,11 +215,21 @@ bool TerminalInteraction::selectGoal(int* goal, const int size) {
  *   - Bước 2: Map sang enum GameMode.
  *   - Trường hợp biên: giá trị ngoài [1,3].
  */
-bool TerminalInteraction::selectGameMode(GameMode* mode) {
-    // TODO: Đọc input mode
-    // TODO: Mapping sang enum tương ứng
-    throw NotImplementedException();
-    return false;
+bool TerminalInteraction::selectGameMode(GameMode *mode)
+{
+    int x;
+
+    if (!getInput(&x))
+        return false;
+
+    if (x < 1 || x > 3)
+    {
+        *mode = GameMode::INVALID_MODE;
+        return false;
+    }
+
+    *mode = (GameMode)(x - 1);
+    return true;
 }
 
 /**
@@ -198,12 +243,21 @@ bool TerminalInteraction::selectGameMode(GameMode* mode) {
  *   - Bước 3: Map sang enum BotLevel.
  *   - Trường hợp biên: index ngoài phạm vi hoặc level sai.
  */
-bool TerminalInteraction::selectBotLevel(BotLevel* levels, const int index) {
-    // TODO: Đọc input bot level
-    // TODO: Validate index
-    // TODO: Mapping sang BotLevel
-    throw NotImplementedException();
-    return false;
+bool TerminalInteraction::selectBotLevel(BotLevel *levels, const int index)
+{
+    int x;
+
+    if (!getInput(&x))
+        return false;
+
+    if (x < 1 || x > 3)
+    {
+        levels[index] = BotLevel::INVALID_LV;
+        return false;
+    }
+
+    levels[index] = (BotLevel)(x - 1);
+    return true;
 }
 
 /**
@@ -216,10 +270,15 @@ bool TerminalInteraction::selectBotLevel(BotLevel* levels, const int index) {
  *   - Bước 2: Gọi getInput cho col.
  *   - Trường hợp biên: input không hợp lệ.
  */
-bool TerminalInteraction::getPlayerMove(int* row, int* col) {
-    // TODO: Đọc row và col
-    throw NotImplementedException();
-    return false;
+bool TerminalInteraction::getPlayerMove(int *row, int *col)
+{
+    if (!getInput(row))
+        return false;
+
+    if (!getInput(col))
+        return false;
+
+    return true;
 }
 
 /**
@@ -230,6 +289,7 @@ bool TerminalInteraction::getPlayerMove(int* row, int* col) {
  *   - Khôi phục std::cin nếu đã bị redirect.
  *   - Đóng file input nếu đang mở.
  */
-void TerminalInteraction::close() {
+void TerminalInteraction::close()
+{
     closeInteraction();
 }
