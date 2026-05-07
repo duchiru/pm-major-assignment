@@ -73,7 +73,7 @@ inline std::string levelToString(Level level) {
  * NOTE:
  *   Có thể thay đổi giá trị này khi init (ví dụ verbose_flag)
  */
-inline static Level min_level = Level::INFO;
+// inline static Level min_level = Level::INFO;
 
 // ---------- Level Color (ANSI escape codes) ----------
 
@@ -118,10 +118,10 @@ inline std::string getColor(Level level) {
 inline static std::ofstream log_file;
 
 // bật/tắt ghi log ra file
-inline static bool write_to_file = false;
+// inline static bool write_to_file = false;
 
 // xác định có đang ở judge mode hay không (ảnh hưởng format/log behavior)
-inline static bool is_judge_mode = false;
+// inline static bool is_judge_mode = false;
 
 // ---------- Functions ----------
 
