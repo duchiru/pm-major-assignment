@@ -16,3 +16,17 @@ void debugPotentialMoves(const std::vector<pII> &potential_moves)
 
     Logger::log("Potential moves: " + move_list, Logger::Level::DEBUG);
 }
+
+ll power(ll base, int exp)
+{
+    ll result = 1;
+
+    for (int i = exp; i > 0; i >>= 1)
+    {
+        if (i & 1)
+            result *= base;
+        base *= base;
+    }
+
+    return result;
+}

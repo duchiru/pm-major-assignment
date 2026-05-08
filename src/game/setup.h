@@ -133,6 +133,7 @@ inline std::mt19937 generator(RANDOM_SEED);
 
 // alias cho pair<int, int> (tọa độ)
 using pII = std::pair<int, int>;
+using ll = long long;
 
 /**
  * Mô tả:

@@ -41,6 +41,7 @@ auto measureExecutionTime(const std::string& label, Function func, bool enabled)
     -> std::invoke_result_t<Function>;
 
 void debugPotentialMoves(const std::vector<pII> &potential_moves);
+ll power(ll base, int exp);
 
 // include phần implementation template
 // NOTE: template phải có full definition khi compile

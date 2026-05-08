@@ -36,6 +36,8 @@
  */
 class BotLevel3 : public BotLevel2 {
    protected:
+    static const int MAX_DEPTH = 8; // độ sâu backtrack tối đa cho thuật toán
+
     /**
      * Mô tả:
      *   Hàm xử lý logic nâng cao cho bot HARD.
@@ -56,6 +58,23 @@ class BotLevel3 : public BotLevel2 {
      *   - Không có
      */
     pII hard_level(char board[][BOARD_N_MAX], const int size, const int goal);
+
+    ll minimax(char board[][BOARD_N_MAX], const int size, const int goal);
+
+    /**
+     * Hàm đánh giá thế trận cho thuật toán Minimax.
+     * 
+     * Đầu vào:
+     *  - board: trạng thái bàn cờ
+     *  - size: kích thước
+     *  - goal: điều kiện thắng
+     *  - selfSymbol: ký hiệu bot
+     *  - opSymbol: ký hiệu đối thủ
+     * 
+     * Đầu ra:
+     *  - Điểm số đánh giá thế trận (càng cao càng tốt cho self)
+     */
+    ll evaluate(char board[][BOARD_N_MAX], const int size, const int goal, const char selfSymbol, const char opSymbol);
 
    public:
     /**
