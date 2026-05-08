@@ -64,10 +64,7 @@ BotLevel1::~BotLevel1() {
  *   - Sử dụng chiến lược đơn giản (random)
  */
 pII BotLevel1::getMove(char board[][BOARD_N_MAX], const int size, const int goal) {
-    // TODO: có thể mở rộng logic trong tương lai
-    // dùng hàm random_pick(...)
-    throw NotImplementedException();
-    return {0, 0};
+    return random_pick(board, size);
 }
 
 /**
@@ -90,7 +87,12 @@ pII BotLevel1::getMove(char board[][BOARD_N_MAX], const int size, const int goal
  *   - Trường hợp biên: board đầy
  */
 pII BotLevel1::random_pick(char board[][BOARD_N_MAX], const int size) {
-    // TODO: implement random pick
-    throw NotImplementedException();
-    return {-1, -1};
+    int x, y;
+
+    do {
+        x = rand() % size;
+        y = rand() % size;
+    } while (board[x][y] != '-');
+
+    return {x, y};
 }
