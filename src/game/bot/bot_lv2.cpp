@@ -41,9 +41,7 @@ BotLevel2::~BotLevel2()
  */
 pII BotLevel2::getMove(char board[][BOARD_N_MAX], const int size, const int goal)
 {
-    // TODO: gọi simple_heuristic với symbol và op_symbol
-    throw NotImplementedException();
-    return {0, 0};
+    return simple_heuristic(board, size, goal, symbol, op_symbol);
 }
 
 /**
