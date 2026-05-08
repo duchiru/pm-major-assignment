@@ -7,6 +7,8 @@
 
 /* ---------- Importing ---------- */
 
+#include "../game/setup.h"
+
 #include <functional>
 #include <string>
 #include <type_traits>
@@ -37,6 +39,8 @@
 template <typename Function>
 auto measureExecutionTime(const std::string& label, Function func, bool enabled)
     -> std::invoke_result_t<Function>;
+
+void debugPotentialMoves(const std::vector<pII> &potential_moves);
 
 // include phần implementation template
 // NOTE: template phải có full definition khi compile
