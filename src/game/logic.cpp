@@ -352,5 +352,5 @@ std::optional<WinLine> Logic::getWinLine(
         }
     }
 
-    return WinLine{cells};
+    return cells.size() != 0 ? std::optional<WinLine>(cells) : std::nullopt;
 }
