@@ -223,7 +223,7 @@ std::optional<WinLine> Logic::getWinLine(
     std::vector<pII> cells; // Cells made the winning line
 
     // Check horizontal
-    for (int i = 0; i < size && cells.size() != 0; i++)
+    for (int i = 0; i < size; i++)
     {
         int cnt = 0;
         for (int j = 0; j < size; j++)
