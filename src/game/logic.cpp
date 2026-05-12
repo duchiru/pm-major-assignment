@@ -223,7 +223,7 @@ std::optional<WinLine> Logic::getWinLine(
     std::vector<pII> cells; // Cells made the winning line
 
     // Check horizontal
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size && cells.empty(); i++)
     {
         int cnt = 0;
         for (int j = 0; j < size; j++)
@@ -245,7 +245,7 @@ std::optional<WinLine> Logic::getWinLine(
     }
 
     // Check vertical
-    for (int j = 0; j < size; j++)
+    for (int j = 0; j < size && cells.empty(); j++)
     {
         int cnt = 0;
         for (int i = 0; i < size; i++)
@@ -267,7 +267,7 @@ std::optional<WinLine> Logic::getWinLine(
     }
 
     // Check main diagonal
-    for (int sj = 0; sj < size; sj++)
+    for (int sj = 0; sj < size && cells.empty(); sj++)
     {
         int cnt = 0;
         for (int i = 0, j = sj; i < size && j < size; i++, j++)
@@ -288,7 +288,7 @@ std::optional<WinLine> Logic::getWinLine(
         }
     }
 
-    for (int si = 1; si < size; si++)
+    for (int si = 1; si < size && cells.empty(); si++)
     {
         int cnt = 0;
         for (int i = si, j = 0; i < size && j < size; i++, j++)
@@ -310,7 +310,7 @@ std::optional<WinLine> Logic::getWinLine(
     }
 
     // Check anti diagonal
-    for (int sj = 0; sj < size; sj++)
+    for (int sj = 0; sj < size && cells.empty(); sj++)
     {
         int cnt = 0;
         for (int i = 0, j = sj; i < size && j >= 0; i++, j--)
@@ -331,7 +331,7 @@ std::optional<WinLine> Logic::getWinLine(
         }
     }
 
-    for (int si = 1; si < size; si++)
+    for (int si = 1; si < size && cells.empty(); si++)
     {
         int cnt = 0;
         for (int i = si, j = size - 1; i < size && j >= 0; i++, j--)
