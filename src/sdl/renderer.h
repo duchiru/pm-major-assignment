@@ -29,6 +29,13 @@ class SDLRenderer : public I_Renderer {
     SDL_Window* window = nullptr;      // Con trỏ tới cửa sổ SDL
     SDL_Renderer* renderer = nullptr;  // Context để vẽ (rendering)
 
+    TTF_Font* titleFont = nullptr;
+    TTF_Font* largeFont = nullptr;
+    TTF_Font* regularFont = nullptr;
+    TTF_Font* smallFont = nullptr;
+
+    SDL_Color textColor = {50, 149, 219, 255};
+
     /**
      * Mô tả: Đẩy nội dung đã vẽ lên màn hình (swap buffer).
      * Đầu vào: Không.
@@ -49,6 +56,17 @@ class SDLRenderer : public I_Renderer {
      * Tác dụng phụ: Vẽ trực tiếp lên renderer.
      */
     void drawRect(int x, int y, int w, int h, SDL_Color color, bool filled);
+
+    /**
+     * Mô tả: Vẽ một nút chọn.
+     * Đầu vào:
+     *   - x, y: tọa độ góc trên bên trái.
+     *   - w, h: chiều rộng và chiều cao.
+     *   - text: nội dung nút.
+     * Đầu ra: Không.
+     * Tác dụng phụ: Vẽ trực tiếp lên renderer.
+     */
+    void renderSelectButton(int x, int y, int w, int h, std::string text);
 
    public:
     /**

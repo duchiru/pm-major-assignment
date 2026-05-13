@@ -4,11 +4,7 @@
  */
 
 #include "interaction.h"
-
-/* ---------- Importing ---------- */
-
-#include <format>
-#include <iostream>
+#include <SDL_events.h>
 
 /* ---------- Definitions ---------- */
 
@@ -21,11 +17,10 @@
  * Tác dụng phụ:
  *   - Ném QuitException nếu nhận được sự kiện thoát.
  */
-bool SDLInteraction::waitForQuit(SDL_Event& e) {
-    if (e.type == SDL_QUIT) {
-        throw QuitException();
-    }
-    return false;
+void SDLInteraction::waitForQuit(SDL_Event &e) {
+  if (e.type == SDL_QUIT) {
+    throw QuitException();
+  }
 }
 
 /**
@@ -34,8 +29,7 @@ bool SDLInteraction::waitForQuit(SDL_Event& e) {
  * Đầu ra: Không có.
  * Tác dụng phụ: Không có.
  */
-SDLInteraction::SDLInteraction() {
-}
+SDLInteraction::SDLInteraction() {}
 
 /**
  * Mô tả: Destructor của SDLInteraction.
@@ -43,8 +37,7 @@ SDLInteraction::SDLInteraction() {
  * Đầu ra: Không có.
  * Tác dụng phụ: Không có.
  */
-SDLInteraction::~SDLInteraction() {
-}
+SDLInteraction::~SDLInteraction() {}
 
 /**
  * Mô tả: Khởi tạo hệ thống interaction cho SDL.
@@ -54,52 +47,45 @@ SDLInteraction::~SDLInteraction() {
  * Tác dụng phụ:
  *   - Thiết lập trạng thái ban đầu cho input SDL.
  */
-void SDLInteraction::init(const RunConfig& config) {
-    // TODO:
-    // - Khởi tạo các thành phần cần thiết cho input SDL
-    // - Có thể reset event queue hoặc trạng thái input
+void SDLInteraction::init(const RunConfig &config) {
+  // TODO:
+  // - Khởi tạo các thành phần cần thiết cho input SDL
+  // - Có thể reset event queue hoặc trạng thái input
 }
 
 /**
  * Mô tả: Tạm dừng chương trình trong SDL.
  *        - Nếu có timeout > 0: delay trong khoảng thời gian tương ứng.
- *        - Nếu timeout == 0: chờ người dùng tương tác (nhấn phím hoặc click chuột).
- * Đầu vào:
- *   - timeout: thời gian chờ (milliseconds). Nếu = 0 thì chờ event từ người dùng.
- * Đầu ra: Không có.
- * Tác dụng phụ:
+ *        - Nếu timeout == 0: chờ người dùng tương tác (nhấn phím hoặc click
+ * chuột). Đầu vào:
+ *   - timeout: thời gian chờ (milliseconds). Nếu = 0 thì chờ event từ người
+ * dùng. Đầu ra: Không có. Tác dụng phụ:
  *   - Có thể block thread hiện tại.
  *   - Có thể ném QuitException nếu người dùng đóng cửa sổ.
  */
 void SDLInteraction::pause(int timeout) {
-    // Nếu có timeout cụ thể -> delay trực tiếp bằng SDL
-    if (timeout > 0) {
-        SDL_Delay(timeout);
-        return;
+  // Nếu có timeout cụ thể -> delay trực tiếp bằng SDL
+  if (timeout > 0) {
+    SDL_Delay(timeout);
+    return;
+  }
+
+  bool waiting = true;
+  SDL_Event event;
+
+  // Vòng lặp chờ sự kiện từ người dùng
+  while (waiting) {
+    // SDL_WaitEvent sẽ block cho tới khi có event
+    if (SDL_WaitEvent(&event)) {
+      // Nếu người dùng đóng cửa sổ -> thoát game
+      waitForQuit(event);
+
+      // Nếu có tương tác (nhấn phím hoặc click chuột) -> kết thúc pause
+      if (event.type == SDL_KEYDOWN || event.type == SDL_MOUSEBUTTONDOWN) {
+        waiting = false;
+      }
     }
-
-    bool waiting = true;
-    SDL_Event event;
-
-    // Vòng lặp chờ sự kiện từ người dùng
-    while (waiting) {
-        // SDL_WaitEvent sẽ block cho tới khi có event
-        if (SDL_WaitEvent(&event)) {
-            // Nếu người dùng đóng cửa sổ -> thoát game
-            if (waitForQuit(event)) {
-            }
-
-            // tương tự
-            // if (event.type == SDL_QUIT) {
-            //     throw QuitException();
-            // }
-
-            // Nếu có tương tác (nhấn phím hoặc click chuột) -> kết thúc pause
-            if (event.type == SDL_KEYDOWN || event.type == SDL_MOUSEBUTTONDOWN) {
-                waiting = false;
-            }
-        }
-    }
+  }
 }
 
 /**
@@ -111,14 +97,46 @@ void SDLInteraction::pause(int timeout) {
  * Tác dụng phụ:
  *   - Cập nhật giá trị tại size nếu thành công.
  */
-bool SDLInteraction::selectSize(int* size) {
-    // TODO:
-    // - Lắng nghe event từ SDL (keyboard/mouse)
-    // - Parse input thành số nguyên
-    // - Kiểm tra điều kiện hợp lệ (BOARD_N_MIN <= size <= BOARD_N_MAX)
-    // - Trả về true nếu hợp lệ, ngược lại false
-    throw NotImplementedException();
-    return false;
+bool SDLInteraction::selectSize(int *size) {
+  SDL_Event event;
+
+  while (true) {
+    if (SDL_WaitEvent(&event)) {
+      waitForQuit(event);
+
+      if (event.type == SDL_MOUSEBUTTONDOWN) {
+        int w = 800, h = 600;
+        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
+        if (window) {
+          SDL_GetWindowSize(window, &w, &h);
+        }
+
+        int cols = 5;
+        int rows = 2;
+        int buttonW = 128;
+        int buttonH = 80;
+        int gapX = 16;
+        int gapY = 24;
+
+        int totalW = cols * buttonW + (cols - 1) * gapX;
+        int totalH = rows * buttonH + (rows - 1) * gapY;
+        int startX = (w - totalW) / 2;
+        int startY = (h - totalH) / 2;
+
+        int mx = event.button.x;
+        int my = event.button.y;
+
+        if (startX <= mx && mx <= startX + totalW && startY <= my &&
+            my <= startY + totalH) {
+          int idxx = (mx - startX) / (buttonW + gapX);
+          int idxy = (my - startY) / (buttonH + gapY);
+
+          *size = idxx + idxy * cols + BOARD_N_MIN;
+          return true;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -131,14 +149,44 @@ bool SDLInteraction::selectSize(int* size) {
  * Tác dụng phụ:
  *   - Cập nhật goal nếu hợp lệ.
  */
-bool SDLInteraction::selectGoal(int* goal, const int size) {
-    // TODO:
-    // - Lấy input từ SDL
-    // - Parse thành số nguyên
-    // - Kiểm tra điều kiện (3 <= goal <= size)
-    // - Trả về true nếu hợp lệ
-    throw NotImplementedException();
-    return false;
+bool SDLInteraction::selectGoal(int *goal, const int size) {
+  SDL_Event event;
+
+  while (true) {
+    if (SDL_WaitEvent(&event)) {
+      waitForQuit(event);
+
+      if (event.type == SDL_MOUSEBUTTONDOWN) {
+        int w = 800, h = 600;
+        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
+        if (window) {
+          SDL_GetWindowSize(window, &w, &h);
+        }
+
+        int numGoal = std::min(size, GOAL_MAX) - BOARD_N_MIN + 1;
+
+        int buttonW = 128;
+        int buttonH = 80;
+        int gapX = 16;
+
+        int totalW = numGoal * buttonW + (numGoal - 1) * gapX;
+        int totalH = buttonH;
+
+        int startX = (w - totalW) / 2;
+        int startY = (h - totalH) / 2;
+
+        int mx = event.button.x;
+        int my = event.button.y;
+
+        if (startX <= mx && mx <= startX + totalW && startY <= my &&
+            my <= startY + totalH) {
+          int idx = (mx - startX) / (buttonW + gapX);
+          *goal = idx + BOARD_N_MIN;
+          return true;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -150,13 +198,44 @@ bool SDLInteraction::selectGoal(int* goal, const int size) {
  * Tác dụng phụ:
  *   - Cập nhật mode nếu hợp lệ.
  */
-bool SDLInteraction::selectGameMode(GameMode* mode) {
-    // TODO:
-    // - Lắng nghe input từ SDL (phím số hoặc click)
-    // - Map input sang GameMode tương ứng
-    // - Validate giá trị (1-3)
-    throw NotImplementedException();
-    return false;
+bool SDLInteraction::selectGameMode(GameMode *mode) {
+  SDL_Event event;
+
+  while (true) {
+    if (SDL_WaitEvent(&event)) {
+      waitForQuit(event);
+
+      if (event.type == SDL_MOUSEBUTTONDOWN) {
+        int w = 800, h = 600;
+        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
+        if (window) {
+          SDL_GetWindowSize(window, &w, &h);
+        }
+
+        int nums = 3;
+
+        int buttonW = 128;
+        int buttonH = 80;
+        int gapX = 16;
+
+        int totalW = nums * buttonW + (nums - 1) * gapX;
+        int totalH = buttonH;
+
+        int startX = (w - totalW) / 2;
+        int startY = (h - totalH) / 2;
+
+        int mx = event.button.x;
+        int my = event.button.y;
+
+        if (startX <= mx && mx <= startX + totalW && startY <= my &&
+            my <= startY + totalH) {
+          int idx = (mx - startX) / (buttonW + gapX);
+          *mode = (GameMode)idx;
+          return true;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -169,14 +248,44 @@ bool SDLInteraction::selectGameMode(GameMode* mode) {
  * Tác dụng phụ:
  *   - Cập nhật levels[index] nếu hợp lệ.
  */
-bool SDLInteraction::selectBotLevel(BotLevel* levels, const int index) {
-    // TODO:
-    // - Kiểm tra index hợp lệ (0 hoặc 1)
-    // - Lấy input từ SDL
-    // - Map sang BotLevel (EASY, MEDIUM, HARD)
-    // - Trả về true nếu hợp lệ
-    throw NotImplementedException();
-    return false;
+bool SDLInteraction::selectBotLevel(BotLevel *levels, const int index) {
+  SDL_Event event;
+
+  while (true) {
+    if (SDL_WaitEvent(&event)) {
+      waitForQuit(event);
+
+      if (event.type == SDL_MOUSEBUTTONDOWN) {
+        int w = 800, h = 600;
+        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
+        if (window) {
+          SDL_GetWindowSize(window, &w, &h);
+        }
+
+        int nums = 3;
+
+        int buttonW = 128;
+        int buttonH = 80;
+        int gapX = 16;
+
+        int totalW = nums * buttonW + (nums - 1) * gapX;
+        int totalH = buttonH;
+
+        int startX = (w - totalW) / 2;
+        int startY = (h - totalH) / 2;
+
+        int mx = event.button.x;
+        int my = event.button.y;
+
+        if (startX <= mx && mx <= startX + totalW && startY <= my &&
+            my <= startY + totalH) {
+          int idx = (mx - startX) / (buttonW + gapX);
+          levels[index] = (BotLevel)idx;
+          return true;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -189,13 +298,13 @@ bool SDLInteraction::selectBotLevel(BotLevel* levels, const int index) {
  * Tác dụng phụ:
  *   - Cập nhật row, col nếu hợp lệ.
  */
-bool SDLInteraction::getPlayerMove(int* row, int* col) {
-    // TODO:
-    // - Lắng nghe mouse click hoặc keyboard input
-    // - Chuyển đổi tọa độ click thành (row, col)
-    // - Validate phạm vi hợp lệ
-    throw NotImplementedException();
-    return false;
+bool SDLInteraction::getPlayerMove(int *row, int *col) {
+  // TODO:
+  // - Lắng nghe mouse click hoặc keyboard input
+  // - Chuyển đổi tọa độ click thành (row, col)
+  // - Validate phạm vi hợp lệ
+  throw NotImplementedException();
+  return false;
 }
 
 /**
@@ -206,6 +315,6 @@ bool SDLInteraction::getPlayerMove(int* row, int* col) {
  *   - Giải phóng hoặc reset trạng thái input nếu cần.
  */
 void SDLInteraction::close() {
-    // TODO:
-    // - Dọn dẹp trạng thái, nếu có resource thì giải phóng
+  // TODO:
+  // - Dọn dẹp trạng thái, nếu có resource thì giải phóng
 }

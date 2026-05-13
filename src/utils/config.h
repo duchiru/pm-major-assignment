@@ -42,14 +42,14 @@ struct RunConfig {
     std::string log_file = "log.txt";  // tên file log
 
     bool verbose_flag = false;  // bật log chi tiết (DEBUG)
-    bool gui_flag = false;      // bật giao diện GUI (SDL) thay vì terminal
+    bool gui_flag = true;      // bật giao diện GUI (SDL) thay vì terminal
 
     bool is_help = false;  // nếu true thì chỉ hiển thị help và thoát
 
     // ---------- SDL Layout ----------
 
     int screenWidth = 800;   // chiều rộng cửa sổ SDL
-    int screenHeight = 800;  // chiều cao cửa sổ SDL
+    int screenHeight = 600;  // chiều cao cửa sổ SDL
     int boardPadding = 100;  // khoảng cách padding của board trong màn hình
 
     // ---------- Helper ----------

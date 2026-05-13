@@ -32,7 +32,7 @@ class SDLInteraction : public I_Interaction {
      * Đầu ra: true nếu nhận được quit event, false nếu không.
      * Tác dụng phụ: Block cho đến khi có event.
      */
-    bool waitForQuit(SDL_Event& e);
+    void waitForQuit(SDL_Event& e);
 
    public:
     /**
