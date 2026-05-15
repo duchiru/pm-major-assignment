@@ -312,9 +312,15 @@ bool SDLInteraction::getPlayerMove(int *row, int *col, const int size) {
           SDL_GetWindowSize(window, &w, &h);
         }
 
-        int cellSize = std::min(w / size, h / size);
-        int startX = (w - cellSize * size) / 2;
-        int startY = (h - cellSize * size) / 2;
+        int padding = 60;
+        int availableSize = std::min(w, h) - 2 * padding;
+        int cellSize = std::min(availableSize / size, 120);
+
+        int boardW = cellSize * size;
+        int boardH = cellSize * size;
+
+        int startX = (w - boardW) / 2;
+        int startY = (h - boardH) / 2;
 
         int mx = event.button.x;
         int my = event.button.y;
