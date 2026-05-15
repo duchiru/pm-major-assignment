@@ -362,6 +362,10 @@ void SDLRenderer::showSelectMenu(SelectType selectType, int context) {
     break;
   }
 
+  case SelectType::PLAYER_UI: {
+    return;
+  }
+
   }
 
   renderPresent();
@@ -420,8 +424,66 @@ void SDLRenderer::showValidSelect(SelectType selectType, int context) {}
  */
 void SDLRenderer::displayBoard(const char board[][BOARD_N_MAX],
                                const int size) {
-  // TODO: Render board
-  throw NotImplementedException();
+  int w, h;
+  SDL_GetWindowSize(window, &w, &h);
+
+  int padding = 60;
+  int availableSize = std::min(w, h) - 2 * padding;
+  int cellSize = std::min(availableSize / size, 120);
+
+  int boardW = cellSize * size;
+  int boardH = cellSize * size;
+
+  int startX = (w - boardW) / 2;
+  int startY = (h - boardH) / 2;
+
+  // Draw grid lines
+  SDL_SetRenderDrawColor(renderer, 31, 31, 31, 255);
+  for (int i = 1; i < size; ++i) {
+    for (int offset = -1; offset <= 1; ++offset) {
+      // Horizontal lines
+      SDL_RenderDrawLine(renderer, startX, startY + i * cellSize + offset,
+                         startX + boardW, startY + i * cellSize + offset);
+      // Vertical lines
+      SDL_RenderDrawLine(renderer, startX + i * cellSize + offset, startY,
+                         startX + i * cellSize + offset, startY + boardH);
+    }
+  }
+
+  // Draw X and O
+  for (int r = 0; r < size; ++r) {
+    for (int c = 0; c < size; ++c) {
+      if (board[r][c] != '-') {
+        std::string mark = std::string(1, board[r][c]);
+        SDL_Color color = (board[r][c] == 'X') ? SDL_Color{235, 64, 52, 255}
+                                               : SDL_Color{52, 110, 235, 255};
+
+        SDL_Surface *markSurface =
+            TTF_RenderUTF8_Blended(titleFont, mark.c_str(), color);
+        SDL_Texture *markTexture =
+            SDL_CreateTextureFromSurface(renderer, markSurface);
+
+        int tw = markSurface->w;
+        int th = markSurface->h;
+
+        // Scale to 60% of cell size
+        float scale = std::min((cellSize * 0.6f) / tw, (cellSize * 0.6f) / th);
+        int dw = tw * scale;
+        int dh = th * scale;
+
+        int dx = startX + c * cellSize + (cellSize - dw) / 2;
+        int dy = startY + r * cellSize + (cellSize - dh) / 2;
+
+        SDL_Rect dest = {dx, dy, dw, dh};
+        SDL_RenderCopy(renderer, markTexture, NULL, &dest);
+
+        SDL_FreeSurface(markSurface);
+        SDL_DestroyTexture(markTexture);
+      }
+    }
+  }
+
+  renderPresent();
 }
 
 /**
@@ -433,10 +495,7 @@ void SDLRenderer::displayBoard(const char board[][BOARD_N_MAX],
  *   - Bước 1: Xác định vị trí ô.
  *   - Bước 2: Vẽ highlight.
  */
-void SDLRenderer::showMove(const int row, const int col) {
-  // TODO: Highlight move
-  throw NotImplementedException();
-}
+void SDLRenderer::showMove(const int row, const int col) {}
 
 /**
  * Mô tả: Hiển thị thông báo nước đi không hợp lệ.
@@ -446,10 +505,7 @@ void SDLRenderer::showMove(const int row, const int col) {
  * TODO:
  *   - Bước 1: Render thông báo lỗi.
  */
-void SDLRenderer::showInvalidMove() {
-  // TODO: Render invalid move message
-  throw NotImplementedException();
-}
+void SDLRenderer::showInvalidMove() {}
 
 /**
  * Mô tả: Hiển thị người chơi hiện tại.
@@ -460,10 +516,7 @@ void SDLRenderer::showInvalidMove() {
  *   - Bước 1: Xác định text.
  *   - Bước 2: Render lên màn hình.
  */
-void SDLRenderer::showPlayer(const int player, const bool is_bot) {
-  // TODO: Render player info
-  throw NotImplementedException();
-}
+void SDLRenderer::showPlayer(const int player, const bool is_bot) {}
 
 /**
  * Mô tả: Hiển thị kết quả game.
@@ -476,10 +529,7 @@ void SDLRenderer::showPlayer(const int player, const bool is_bot) {
  *   - Bước 3: Highlight winLine nếu có.
  */
 void SDLRenderer::showResult(const int winner, const bool is_bot,
-                             const WinLine *winLine) {
-  // TODO: Render result
-  throw NotImplementedException();
-}
+                             const WinLine *winLine) {}
 
 /**
  * Mô tả: In kết quả ra stdout (judge mode).
@@ -490,10 +540,7 @@ void SDLRenderer::showResult(const int winner, const bool is_bot,
  *   - Bước 1: Format output.
  *   - Bước 2: In ra std::cout.
  */
-void SDLRenderer::printResult(const GameResult &gameResult) {
-  // TODO: Print result
-  throw NotImplementedException();
-}
+void SDLRenderer::printResult(const GameResult &gameResult) {}
 
 /**
  * Mô tả: Giải phóng tài nguyên SDL.
@@ -504,11 +551,6 @@ void SDLRenderer::printResult(const GameResult &gameResult) {
  *   - Shutdown SDL subsystem.
  */
 void SDLRenderer::close() {
-  // if (font) {
-  //     TTF_CloseFont(font);
-  //     font = nullptr;
-  // }
-
   TTF_Quit();
 
   SDL_DestroyRenderer(renderer);

@@ -270,7 +270,7 @@ bool TerminalInteraction::selectBotLevel(BotLevel *levels, const int index)
  *   - Bước 2: Gọi getInput cho col.
  *   - Trường hợp biên: input không hợp lệ.
  */
-bool TerminalInteraction::getPlayerMove(int *row, int *col)
+bool TerminalInteraction::getPlayerMove(int *row, int *col, const int size)
 {
     if (!getInput(row))
         return false;
@@ -278,7 +278,7 @@ bool TerminalInteraction::getPlayerMove(int *row, int *col)
     if (!getInput(col))
         return false;
 
-    return true;
+    return (0 <= *row && *row < size && 0 <= *col && *col < size);
 }
 
 /**

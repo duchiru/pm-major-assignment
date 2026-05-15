@@ -207,7 +207,7 @@ class TerminalInteraction : public I_Interaction {
      *   - true nếu parse thành công
      *   - false nếu lỗi format
      */
-    bool getPlayerMove(int* row, int* col) override;
+    bool getPlayerMove(int* row, int* col, const int size) override;
 
     /**
      * Mô tả:

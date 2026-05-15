@@ -298,13 +298,36 @@ bool SDLInteraction::selectBotLevel(BotLevel *levels, const int index) {
  * Tác dụng phụ:
  *   - Cập nhật row, col nếu hợp lệ.
  */
-bool SDLInteraction::getPlayerMove(int *row, int *col) {
-  // TODO:
-  // - Lắng nghe mouse click hoặc keyboard input
-  // - Chuyển đổi tọa độ click thành (row, col)
-  // - Validate phạm vi hợp lệ
-  throw NotImplementedException();
-  return false;
+bool SDLInteraction::getPlayerMove(int *row, int *col, const int size) {
+  SDL_Event event;
+
+  while (true) {
+    if (SDL_WaitEvent(&event)) {
+      waitForQuit(event);
+
+      if (event.type == SDL_MOUSEBUTTONDOWN) {
+        int w = 800, h = 600;
+        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
+        if (window) {
+          SDL_GetWindowSize(window, &w, &h);
+        }
+
+        int cellSize = std::min(w / size, h / size);
+        int startX = (w - cellSize * size) / 2;
+        int startY = (h - cellSize * size) / 2;
+
+        int mx = event.button.x;
+        int my = event.button.y;
+
+        if (startX <= mx && mx <= startX + cellSize * size &&
+            startY <= my && my <= startY + cellSize * size) {
+          *row = (my - startY) / cellSize;
+          *col = (mx - startX) / cellSize;
+          return true;
+        }
+      }
+    }
+  }
 }
 
 /**

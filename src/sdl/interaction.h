@@ -114,7 +114,7 @@ class SDLInteraction : public I_Interaction {
      *   - Đọc event chuột hoặc bàn phím.
      * NOTE: Cần map tọa độ pixel -> tọa độ board.
      */
-    bool getPlayerMove(int* row, int* col) override;
+    bool getPlayerMove(int* row, int* col, const int size) override;
 
     /**
      * Mô tả: Đóng hệ thống interaction SDL.

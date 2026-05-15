@@ -154,7 +154,7 @@ class I_Interaction {
      * Tác dụng phụ:
      *   - Ghi giá trị vào row và col
      */
-    virtual bool getPlayerMove(int* row, int* col) = 0;
+    virtual bool getPlayerMove(int* row, int* col, const int size) = 0;
 
     /**
      * Mô tả:
