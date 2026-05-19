@@ -37,11 +37,14 @@ SDLRenderer::~SDLRenderer() {}
  */
 void SDLRenderer::init(const RunConfig &config) {
   // read config
-  int screenWidth = config.screenWidth;
-  int screenHeight = config.screenHeight;
+  this->screenWidth = config.screenWidth;
+  this->screenHeight = config.screenHeight;
+  this->padding = config.boardPadding;
 
-  // int boardPadding = config.boardPadding;
-  // init(...)
+  this->buttonWidth = 128;
+  this->buttonHeight = 80;
+  this->gapX = 16;
+  this->gapY = 16;
 
   SDL_Init(SDL_INIT_VIDEO);
   TTF_Init();
@@ -113,8 +116,7 @@ void SDLRenderer::drawRect(int x, int y, int w, int h, SDL_Color color,
 void SDLRenderer::showSelectMenu(SelectType selectType, int context) {
   clearScreen();
 
-  int w, h;
-  SDL_GetWindowSize(window, &w, &h);
+  int w = this->screenWidth, h = this->screenHeight;
 
   switch (selectType) {
 
@@ -424,19 +426,16 @@ void SDLRenderer::showValidSelect(SelectType selectType, int context) {}
  */
 void SDLRenderer::displayBoard(const char board[][BOARD_N_MAX],
                                const int size) {
-  int w, h;
-  SDL_GetWindowSize(window, &w, &h);
-
-  int padding = 60;
-  int availableSize = std::min(w, h) - 2 * padding;
+  int availableSize =
+      std::min(this->screenWidth, this->screenHeight) - 2 * this->padding;
   int cellSize = std::min(availableSize / size, 120);
 
   int boardW = cellSize * size;
   int boardH = cellSize * size;
 
-  int startX = (w - boardW) / 2;
-  int startY = (h - boardH) / 2 + padding / 4;
-  
+  int startX = (this->screenWidth - boardW) / 2;
+  int startY = (this->screenHeight - boardH) / 2 + this->padding / 4;
+
   this->cellSize = cellSize;
   this->boardStartX = startX;
   this->boardStartY = startY;
@@ -532,10 +531,9 @@ void SDLRenderer::showPlayer(const int player, const bool is_bot) {
   int promptW = promptSurface->w;
   int promptH = promptSurface->h;
 
-  int w, h;
-  SDL_GetWindowSize(window, &w, &h);
-
-  SDL_Rect promptRect = {(w - promptW) / 2, ((60 * 5 / 4) - promptH) / 2, promptW, promptH};
+  SDL_Rect promptRect = {(this->screenWidth - promptW) / 2,
+                         ((this->padding * 5 / 4) - promptH) / 2, promptW,
+                         promptH};
   SDL_RenderCopy(renderer, promptTexture, NULL, &promptRect);
 
   SDL_FreeSurface(promptSurface);
@@ -570,10 +568,9 @@ void SDLRenderer::showResult(const int winner, const bool is_bot,
   int promptW = promptSurface->w;
   int promptH = promptSurface->h;
 
-  int w, h;
-  SDL_GetWindowSize(window, &w, &h);
-
-  SDL_Rect promptRect = {(w - promptW) / 2, ((60 * 5 / 4) - promptH) / 2, promptW, promptH};
+  SDL_Rect promptRect = {(this->screenWidth - promptW) / 2,
+                         ((this->padding * 5 / 4) - promptH) / 2, promptW,
+                         promptH};
   SDL_RenderCopy(renderer, promptTexture, NULL, &promptRect);
 
   SDL_FreeSurface(promptSurface);
@@ -582,12 +579,11 @@ void SDLRenderer::showResult(const int winner, const bool is_bot,
   // Render win line if exist
   if (winLine != nullptr) {
     SDL_SetRenderDrawColor(renderer, 255, 235, 59, 128);
-    for (const auto& cell : winLine->cells) {
+    for (const auto &cell : winLine->cells) {
       int r = cell.first;
       int c = cell.second;
-      SDL_Rect highlightRect = {boardStartX + c * cellSize, 
-                                boardStartY + r * cellSize, 
-                                cellSize, cellSize};
+      SDL_Rect highlightRect = {boardStartX + c * cellSize,
+                                boardStartY + r * cellSize, cellSize, cellSize};
       SDL_RenderFillRect(renderer, &highlightRect);
     }
   }

@@ -48,9 +48,16 @@ SDLInteraction::~SDLInteraction() {}
  *   - Thiết lập trạng thái ban đầu cho input SDL.
  */
 void SDLInteraction::init(const RunConfig &config) {
-  // TODO:
-  // - Khởi tạo các thành phần cần thiết cho input SDL
-  // - Có thể reset event queue hoặc trạng thái input
+  // Load config
+  this->screenWidth = config.screenWidth;
+  this->screenHeight = config.screenHeight;
+  this->padding = config.boardPadding;
+
+  // Init button size
+  this->buttonWidth = 128;
+  this->buttonHeight = 80;
+  this->gapX = 16;
+  this->gapY = 24;
 }
 
 /**
@@ -105,31 +112,21 @@ bool SDLInteraction::selectSize(int *size) {
       waitForQuit(event);
 
       if (event.type == SDL_MOUSEBUTTONDOWN) {
-        int w = 800, h = 600;
-        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
-        if (window) {
-          SDL_GetWindowSize(window, &w, &h);
-        }
-
         int cols = 5;
         int rows = 2;
-        int buttonW = 128;
-        int buttonH = 80;
-        int gapX = 16;
-        int gapY = 24;
 
-        int totalW = cols * buttonW + (cols - 1) * gapX;
-        int totalH = rows * buttonH + (rows - 1) * gapY;
-        int startX = (w - totalW) / 2;
-        int startY = (h - totalH) / 2;
+        int totalW = cols * this->buttonWidth + (cols - 1) * this->gapX;
+        int totalH = rows * this->buttonHeight + (rows - 1) * this->gapY;
+        int startX = (this->screenWidth - totalW) / 2;
+        int startY = (this->screenHeight - totalH) / 2;
 
         int mx = event.button.x;
         int my = event.button.y;
 
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
-          int idxx = (mx - startX) / (buttonW + gapX);
-          int idxy = (my - startY) / (buttonH + gapY);
+          int idxx = (mx - startX) / (this->buttonWidth + this->gapX);
+          int idxy = (my - startY) / (this->buttonHeight + this->gapY);
 
           *size = idxx + idxy * cols + BOARD_N_MIN;
           return true;
@@ -157,30 +154,20 @@ bool SDLInteraction::selectGoal(int *goal, const int size) {
       waitForQuit(event);
 
       if (event.type == SDL_MOUSEBUTTONDOWN) {
-        int w = 800, h = 600;
-        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
-        if (window) {
-          SDL_GetWindowSize(window, &w, &h);
-        }
-
         int numGoal = std::min(size, GOAL_MAX) - BOARD_N_MIN + 1;
 
-        int buttonW = 128;
-        int buttonH = 80;
-        int gapX = 16;
+        int totalW = numGoal * this->buttonWidth + (numGoal - 1) * this->gapX;
+        int totalH = this->buttonHeight;
 
-        int totalW = numGoal * buttonW + (numGoal - 1) * gapX;
-        int totalH = buttonH;
-
-        int startX = (w - totalW) / 2;
-        int startY = (h - totalH) / 2;
+        int startX = (this->screenWidth - totalW) / 2;
+        int startY = (this->screenHeight - totalH) / 2;
 
         int mx = event.button.x;
         int my = event.button.y;
 
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
-          int idx = (mx - startX) / (buttonW + gapX);
+          int idx = (mx - startX) / (this->buttonWidth + this->gapX);
           *goal = idx + BOARD_N_MIN;
           return true;
         }
@@ -206,30 +193,20 @@ bool SDLInteraction::selectGameMode(GameMode *mode) {
       waitForQuit(event);
 
       if (event.type == SDL_MOUSEBUTTONDOWN) {
-        int w = 800, h = 600;
-        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
-        if (window) {
-          SDL_GetWindowSize(window, &w, &h);
-        }
-
         int nums = 3;
 
-        int buttonW = 128;
-        int buttonH = 80;
-        int gapX = 16;
+        int totalW = nums * this->buttonWidth + (nums - 1) * this->gapX;
+        int totalH = this->buttonHeight;
 
-        int totalW = nums * buttonW + (nums - 1) * gapX;
-        int totalH = buttonH;
-
-        int startX = (w - totalW) / 2;
-        int startY = (h - totalH) / 2;
+        int startX = (this->screenWidth - totalW) / 2;
+        int startY = (this->screenHeight - totalH) / 2;
 
         int mx = event.button.x;
         int my = event.button.y;
 
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
-          int idx = (mx - startX) / (buttonW + gapX);
+          int idx = (mx - startX) / (this->buttonWidth + this->gapX);
           *mode = (GameMode)idx;
           return true;
         }
@@ -256,30 +233,20 @@ bool SDLInteraction::selectBotLevel(BotLevel *levels, const int index) {
       waitForQuit(event);
 
       if (event.type == SDL_MOUSEBUTTONDOWN) {
-        int w = 800, h = 600;
-        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
-        if (window) {
-          SDL_GetWindowSize(window, &w, &h);
-        }
-
         int nums = 3;
 
-        int buttonW = 128;
-        int buttonH = 80;
-        int gapX = 16;
+        int totalW = nums * this->buttonWidth + (nums - 1) * this->gapX;
+        int totalH = this->buttonHeight;
 
-        int totalW = nums * buttonW + (nums - 1) * gapX;
-        int totalH = buttonH;
-
-        int startX = (w - totalW) / 2;
-        int startY = (h - totalH) / 2;
+        int startX = (this->screenWidth - totalW) / 2;
+        int startY = (this->screenHeight - totalH) / 2;
 
         int mx = event.button.x;
         int my = event.button.y;
 
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
-          int idx = (mx - startX) / (buttonW + gapX);
+          int idx = (mx - startX) / (this->buttonWidth + this->gapX);
           levels[index] = (BotLevel)idx;
           return true;
         }
@@ -306,27 +273,21 @@ bool SDLInteraction::getPlayerMove(int *row, int *col, const int size) {
       waitForQuit(event);
 
       if (event.type == SDL_MOUSEBUTTONDOWN) {
-        int w = 800, h = 600;
-        SDL_Window *window = SDL_GetWindowFromID(event.button.windowID);
-        if (window) {
-          SDL_GetWindowSize(window, &w, &h);
-        }
-
-        int padding = 60;
-        int availableSize = std::min(w, h) - 2 * padding;
+        int availableSize =
+            std::min(this->screenWidth, this->screenHeight) - 2 * this->padding;
         int cellSize = std::min(availableSize / size, 120);
 
         int boardW = cellSize * size;
         int boardH = cellSize * size;
 
-        int startX = (w - boardW) / 2;
-        int startY = (h - boardH) / 2 + padding / 4;
+        int startX = (this->screenWidth - boardW) / 2;
+        int startY = (this->screenHeight - boardH) / 2 + this->padding / 4;
 
         int mx = event.button.x;
         int my = event.button.y;
 
-        if (startX <= mx && mx <= startX + cellSize * size &&
-            startY <= my && my <= startY + cellSize * size) {
+        if (startX <= mx && mx <= startX + cellSize * size && startY <= my &&
+            my <= startY + cellSize * size) {
           *row = (my - startY) / cellSize;
           *col = (mx - startX) / cellSize;
           return true;

@@ -26,6 +26,12 @@
  */
 class SDLInteraction : public I_Interaction {
    private:
+    // Config
+    int screenWidth, screenHeight, padding;
+
+    // Game setup
+    int buttonWidth, buttonHeight, gapX, gapY;
+
     /**
      * Mô tả: Chờ event quit (đóng cửa sổ) từ người dùng.
      * Đầu vào: e - SDL_Event để lưu sự kiện nhận được.
