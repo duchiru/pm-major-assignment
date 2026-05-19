@@ -134,6 +134,26 @@ void Logger::log(const std::string& msg, Level level) {
     }
 }
 
+void Logger::debug(const std::string& msg) {
+    log(msg, Level::DEBUG);
+}
+
+void Logger::info(const std::string& msg) {
+    log(msg, Level::INFO);
+}
+
+void Logger::warning(const std::string& msg) {
+    log(msg, Level::WARNING);
+}
+
+void Logger::error(const std::string& msg) {
+    log(msg, Level::ERROR);
+}
+
+void Logger::msg(const std::string& msg) {
+    log(msg, Level::MSG);
+}
+
 /**
  * Mô tả:
  *   Đóng logger và giải phóng tài nguyên file.

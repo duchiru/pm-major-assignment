@@ -171,6 +171,12 @@ void init(bool judge_mode, bool to_file = true, const std::string& path = "log.t
  */
 void log(const std::string& msg, Level level = Level::INFO);
 
+void debug(const std::string& msg);
+void info(const std::string& msg);
+void warning(const std::string& msg);
+void error(const std::string& msg);
+void msg(const std::string& msg);
+
 /**
  * Mô tả:
  *   Đóng logger, giải phóng tài nguyên.
