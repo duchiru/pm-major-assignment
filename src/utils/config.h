@@ -52,6 +52,8 @@ struct RunConfig {
     int screenHeight = 600;  // chiều cao cửa sổ SDL
     int boardPadding = 60;  // khoảng cách padding của board trong màn hình
 
+    int fps = 60;
+
     // ---------- Helper ----------
 
     /**

@@ -42,7 +42,7 @@ class SDLRenderer : public I_Renderer {
     int buttonWidth, buttonHeight, gapX, gapY;
 
     // Runtime
-    int cellSize, boardStartX, boardStartY;
+    int size, cellSize, boardStartX, boardStartY;
 
     /**
      * Mô tả: Đẩy nội dung đã vẽ lên màn hình (swap buffer).
@@ -111,6 +111,14 @@ class SDLRenderer : public I_Renderer {
      * Tác dụng phụ: Reset nội dung render.
      */
     void clearScreen() override;
+
+    /**
+     * Mô tả: Đẩy nội dung đã chuẩn bị lên màn hình (frame mới).
+     * Đầu vào: Không.
+     * Đầu ra: Không.
+     * Tác dụng phụ: Tạo ra frame mới.
+     */
+    void renderFrame() override;
 
     /**
      * Mô tả: Hiển thị menu lựa chọn (UI).

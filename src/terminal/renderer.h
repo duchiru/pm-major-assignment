@@ -78,6 +78,8 @@ class TerminalRenderer : public I_Renderer {
      */
     void clearScreen() override;
 
+    void renderFrame() override;
+
     /**
      * Mô tả:
      *   Hiển thị menu lựa chọn (size, mode, bot level, ...).

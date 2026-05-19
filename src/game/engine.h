@@ -11,6 +11,7 @@
 #include "interface/i_interaction.h"
 #include "interface/i_renderer.h"
 #include "setup.h"
+#include <chrono>
 
 /* ---------- Declarations ---------- */
 
@@ -46,6 +47,8 @@ class Engine {
     I_Interaction* iInteraction;  // interaction dùng để nhận input
 
     GameSetup gameSetup;  // chứa thông tin setup ban đầu của game (board size, mode, ...)
+
+    std::chrono::milliseconds frame_duration;
 
     /**
      * Mô tả:

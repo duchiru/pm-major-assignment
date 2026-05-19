@@ -268,33 +268,48 @@ bool SDLInteraction::selectBotLevel(BotLevel *levels, const int index) {
 bool SDLInteraction::getPlayerMove(int *row, int *col, const int size) {
   SDL_Event event;
 
-  while (true) {
-    if (SDL_WaitEvent(&event)) {
-      waitForQuit(event);
+  if (SDL_PollEvent(&event)) {
+    waitForQuit(event);
 
-      if (event.type == SDL_MOUSEBUTTONDOWN) {
-        int availableSize =
-            std::min(this->screenWidth, this->screenHeight) - 2 * this->padding;
-        int cellSize = std::min(availableSize / size, 120);
+    if (event.type == SDL_MOUSEBUTTONDOWN) {
+      int availableSize =
+          std::min(this->screenWidth, this->screenHeight) - 2 * this->padding;
+      int cellSize = std::min(availableSize / size, 120);
 
-        int boardW = cellSize * size;
-        int boardH = cellSize * size;
+      int boardW = cellSize * size;
+      int boardH = cellSize * size;
 
-        int startX = (this->screenWidth - boardW) / 2;
-        int startY = (this->screenHeight - boardH) / 2 + this->padding / 4;
+      int startX = (this->screenWidth - boardW) / 2;
+      int startY = (this->screenHeight - boardH) / 2 + this->padding / 4;
 
-        int mx = event.button.x;
-        int my = event.button.y;
+      int mx = event.button.x;
+      int my = event.button.y;
 
-        if (startX <= mx && mx <= startX + cellSize * size && startY <= my &&
-            my <= startY + cellSize * size) {
-          *row = (my - startY) / cellSize;
-          *col = (mx - startX) / cellSize;
-          return true;
-        }
+      if (startX <= mx && mx <= startX + cellSize * size && startY <= my &&
+          my <= startY + cellSize * size) {
+        *row = (my - startY) / cellSize;
+        *col = (mx - startX) / cellSize;
+        return true;
+      }
+    }
+
+    if (event.type == SDL_KEYDOWN) {
+      if (event.key.keysym.sym == SDLK_UP) {
+        *row = (*row - 1 + size) % size;
+      } else if (event.key.keysym.sym == SDLK_DOWN) {
+        *row = (*row + 1) % size;
+      } else if (event.key.keysym.sym == SDLK_LEFT) {
+        *col = (*col - 1 + size) % size;
+      } else if (event.key.keysym.sym == SDLK_RIGHT) {
+        *col = (*col + 1) % size;
+      } else if (event.key.keysym.sym == SDLK_RETURN ||
+                 event.key.keysym.sym == SDLK_SPACE) {
+        return true;
       }
     }
   }
+
+  return false;
 }
 
 /**

@@ -65,6 +65,8 @@ void TerminalRenderer::clearScreen()
               << "\x1B[2J\x1B[H" << "\n";
 }
 
+void TerminalRenderer::renderFrame() {}
+
 /**
  * Mô tả:
  *   Hiển thị menu lựa chọn.

@@ -72,6 +72,12 @@ class I_Renderer {
 
     /**
      * Mô tả:
+     *   In ra màn hình hoàn thiện (một frame mới).
+     */
+    virtual void renderFrame() = 0;
+
+    /**
+     * Mô tả:
      *   Hiển thị menu chọn (size, goal, mode, ...)
      *
      * Đầu vào:

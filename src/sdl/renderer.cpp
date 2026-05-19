@@ -75,6 +75,14 @@ void SDLRenderer::clearScreen() {
 }
 
 /**
+ * Mô tả: Đẩy nội dung đã chuẩn bị lên màn hình (frame mới).
+ * Đầu vào: Không.
+ * Đầu ra: Không.
+ * Tác dụng phụ: Tạo ra frame mới.
+ */
+void SDLRenderer::renderFrame() { renderPresent(); };
+
+/**
  * Mô tả: Hiển thị frame đã render lên màn hình.
  * Đầu vào: Không.
  * Đầu ra: Không.
@@ -114,7 +122,9 @@ void SDLRenderer::drawRect(int x, int y, int w, int h, SDL_Color color,
  *   - Trường hợp biên: selectType không hợp lệ.
  */
 void SDLRenderer::showSelectMenu(SelectType selectType, int context) {
-  clearScreen();
+  if (selectType != SelectType::PLAYER_UI) {
+    clearScreen();
+  }
 
   int w = this->screenWidth, h = this->screenHeight;
 
@@ -366,7 +376,21 @@ void SDLRenderer::showSelectMenu(SelectType selectType, int context) {
   }
 
   case SelectType::PLAYER_UI: {
-    return;
+    int row = context / this->size;
+    int col = context % this->size;
+
+    SDL_Rect highlightRect = {boardStartX + col * cellSize,
+                              boardStartY + row * cellSize, cellSize, cellSize};
+
+    SDL_SetRenderDrawColor(renderer,
+                           200, // r
+                           200, // g
+                           200, // b
+                           128  // a
+    );                          // semi-transparent gray
+    SDL_RenderFillRect(renderer, &highlightRect);
+
+    break;
   }
   }
 
@@ -436,6 +460,7 @@ void SDLRenderer::displayBoard(const char board[][BOARD_N_MAX],
   int startX = (this->screenWidth - boardW) / 2;
   int startY = (this->screenHeight - boardH) / 2 + this->padding / 4;
 
+  this->size = size;
   this->cellSize = cellSize;
   this->boardStartX = startX;
   this->boardStartY = startY;
@@ -485,8 +510,6 @@ void SDLRenderer::displayBoard(const char board[][BOARD_N_MAX],
       }
     }
   }
-
-  renderPresent();
 }
 
 /**
@@ -538,8 +561,6 @@ void SDLRenderer::showPlayer(const int player, const bool is_bot) {
 
   SDL_FreeSurface(promptSurface);
   SDL_DestroyTexture(promptTexture);
-
-  renderPresent();
 }
 
 /**
@@ -587,8 +608,6 @@ void SDLRenderer::showResult(const int winner, const bool is_bot,
       SDL_RenderFillRect(renderer, &highlightRect);
     }
   }
-
-  renderPresent();
 }
 
 /**
