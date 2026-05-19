@@ -325,8 +325,9 @@ void SDLRenderer::showSelectMenu(SelectType selectType, int context) {
   }
 
   case SelectType::MUL_BOT_LEVEL_UI: {
-    SDL_Surface *titleSurface =
-        TTF_RenderUTF8_Blended(largeFont, std::format("Select level for bot {}", context + 1).c_str(), textColor);
+    SDL_Surface *titleSurface = TTF_RenderUTF8_Blended(
+        largeFont, std::format("Select level for bot {}", context + 1).c_str(),
+        textColor);
     SDL_Texture *titleTexture =
         SDL_CreateTextureFromSurface(renderer, titleSurface);
     int titleW = titleSurface->w;
@@ -365,7 +366,6 @@ void SDLRenderer::showSelectMenu(SelectType selectType, int context) {
   case SelectType::PLAYER_UI: {
     return;
   }
-
   }
 
   renderPresent();
@@ -435,7 +435,11 @@ void SDLRenderer::displayBoard(const char board[][BOARD_N_MAX],
   int boardH = cellSize * size;
 
   int startX = (w - boardW) / 2;
-  int startY = (h - boardH) / 2;
+  int startY = (h - boardH) / 2 + padding / 4;
+  
+  this->cellSize = cellSize;
+  this->boardStartX = startX;
+  this->boardStartY = startY;
 
   // Draw grid lines
   SDL_SetRenderDrawColor(renderer, 31, 31, 31, 255);
@@ -516,7 +520,29 @@ void SDLRenderer::showInvalidMove() {}
  *   - Bước 1: Xác định text.
  *   - Bước 2: Render lên màn hình.
  */
-void SDLRenderer::showPlayer(const int player, const bool is_bot) {}
+void SDLRenderer::showPlayer(const int player, const bool is_bot) {
+  SDL_Surface *promptSurface =
+      TTF_RenderUTF8_Blended(largeFont,
+                             std::format("It's turn for player {}{}.",
+                                         player + 1, is_bot ? " (bot)" : "")
+                                 .c_str(),
+                             secondaryColor);
+  SDL_Texture *promptTexture =
+      SDL_CreateTextureFromSurface(renderer, promptSurface);
+  int promptW = promptSurface->w;
+  int promptH = promptSurface->h;
+
+  int w, h;
+  SDL_GetWindowSize(window, &w, &h);
+
+  SDL_Rect promptRect = {(w - promptW) / 2, ((60 * 5 / 4) - promptH) / 2, promptW, promptH};
+  SDL_RenderCopy(renderer, promptTexture, NULL, &promptRect);
+
+  SDL_FreeSurface(promptSurface);
+  SDL_DestroyTexture(promptTexture);
+
+  renderPresent();
+}
 
 /**
  * Mô tả: Hiển thị kết quả game.
@@ -529,7 +555,45 @@ void SDLRenderer::showPlayer(const int player, const bool is_bot) {}
  *   - Bước 3: Highlight winLine nếu có.
  */
 void SDLRenderer::showResult(const int winner, const bool is_bot,
-                             const WinLine *winLine) {}
+                             const WinLine *winLine) {
+  std::string winStr;
+  if (winner == -1)
+    winStr = "Draw";
+  else
+    winStr = std::format("The winner is player {}{}.", winner + 1,
+                         is_bot ? " (bot)" : "");
+
+  SDL_Surface *promptSurface =
+      TTF_RenderUTF8_Blended(largeFont, winStr.c_str(), secondaryColor);
+  SDL_Texture *promptTexture =
+      SDL_CreateTextureFromSurface(renderer, promptSurface);
+  int promptW = promptSurface->w;
+  int promptH = promptSurface->h;
+
+  int w, h;
+  SDL_GetWindowSize(window, &w, &h);
+
+  SDL_Rect promptRect = {(w - promptW) / 2, ((60 * 5 / 4) - promptH) / 2, promptW, promptH};
+  SDL_RenderCopy(renderer, promptTexture, NULL, &promptRect);
+
+  SDL_FreeSurface(promptSurface);
+  SDL_DestroyTexture(promptTexture);
+
+  // Render win line if exist
+  if (winLine != nullptr) {
+    SDL_SetRenderDrawColor(renderer, 255, 235, 59, 128);
+    for (const auto& cell : winLine->cells) {
+      int r = cell.first;
+      int c = cell.second;
+      SDL_Rect highlightRect = {boardStartX + c * cellSize, 
+                                boardStartY + r * cellSize, 
+                                cellSize, cellSize};
+      SDL_RenderFillRect(renderer, &highlightRect);
+    }
+  }
+
+  renderPresent();
+}
 
 /**
  * Mô tả: In kết quả ra stdout (judge mode).

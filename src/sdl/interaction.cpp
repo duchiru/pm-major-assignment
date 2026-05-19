@@ -320,7 +320,7 @@ bool SDLInteraction::getPlayerMove(int *row, int *col, const int size) {
         int boardH = cellSize * size;
 
         int startX = (w - boardW) / 2;
-        int startY = (h - boardH) / 2;
+        int startY = (h - boardH) / 2 + padding / 4;
 
         int mx = event.button.x;
         int my = event.button.y;

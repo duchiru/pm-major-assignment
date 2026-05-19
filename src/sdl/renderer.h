@@ -35,7 +35,11 @@ class SDLRenderer : public I_Renderer {
     TTF_Font* smallFont = nullptr;
 
     SDL_Color textColor = {50, 149, 219, 255};
+    SDL_Color secondaryColor = {125, 125, 125, 255};
 
+    int cellSize;
+    int boardStartX;
+    int boardStartY;
     /**
      * Mô tả: Đẩy nội dung đã vẽ lên màn hình (swap buffer).
      * Đầu vào: Không.
