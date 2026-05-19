@@ -336,6 +336,9 @@ GameResult Engine::playGame() {
 
     // 1. Get Move
     if (is_bot[player]) {
+      if (config->interactive) {
+        iRenderer->renderFrame();
+      }
       // NOTE: đo thời gian thực thi bot
       pII point = measureExecutionTime(
           std::format("bot#{}->getMove()", player),
@@ -351,9 +354,11 @@ GameResult Engine::playGame() {
       making_move = false;
     } else {
       if (making_move) {
-        if (config->interactive)
+        if (config->interactive) {
           iRenderer->showSelectMenu(SelectType::PLAYER_UI,
                                     row * gameSetup.size + col);
+          iRenderer->renderFrame();
+        }
 
         if (iInteraction->getPlayerMove(&row, &col, gameSetup.size))
           if (Logic::isValidMove(gameSetup.board, gameSetup.size, row, col))
@@ -399,8 +404,6 @@ GameResult Engine::playGame() {
 
     if (gameResult.turns > turns)
       Logger::debug("[Engine] turn done!");
-
-    iRenderer->renderFrame();
 
     auto end_time = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
