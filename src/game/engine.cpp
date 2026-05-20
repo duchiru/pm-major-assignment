@@ -252,18 +252,18 @@ void Engine::startGame() {
       }
 
       if (iInteraction->selectBotLevel(gameSetup.levels, context)) {
-        settingUp = false;
+        if (context == 1) {
+          settingUp = false;
+          context = NO_CONTEXT;
+        } else {
+          context = 1;
+        }
       } else {
         if (config->interactive) {
           iRenderer->showInvalidSelect(SelectType::MUL_BOT_LEVEL_UI,
-                                       (int)gameSetup.levels[1]);
+                                       (int)gameSetup.levels[context]);
           preservePrevFrame = true;
         }
-      }
-
-      if (context == 1) {
-        settingUp = false;
-        context = NO_CONTEXT;
       }
 
       break;
