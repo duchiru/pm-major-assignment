@@ -408,7 +408,7 @@ GameResult Engine::playGame() {
 
       // delay khi bot chơi để dễ quan sát
       if (is_bot[player] and config->interactive) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+        iInteraction->pause(SLEEP_TIME);
       }
 
       // 3. Check result

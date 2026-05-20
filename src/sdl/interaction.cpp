@@ -5,6 +5,7 @@
 
 #include "interaction.h"
 #include <SDL_events.h>
+#include <chrono>
 
 /* ---------- Definitions ---------- */
 
@@ -71,25 +72,31 @@ void SDLInteraction::init(const RunConfig &config) {
  *   - Có thể ném QuitException nếu người dùng đóng cửa sổ.
  */
 void SDLInteraction::pause(int timeout) {
-  // Nếu có timeout cụ thể -> delay trực tiếp bằng SDL
-  if (timeout > 0) {
-    SDL_Delay(timeout);
-    return;
-  }
-
-  bool waiting = true;
   SDL_Event event;
 
-  // Vòng lặp chờ sự kiện từ người dùng
-  while (waiting) {
-    // SDL_WaitEvent sẽ block cho tới khi có event
-    if (SDL_WaitEvent(&event)) {
-      // Nếu người dùng đóng cửa sổ -> thoát game
-      waitForQuit(event);
+  if (timeout > 0) {
+    auto startTime = std::chrono::steady_clock::now();
+    int remaining = timeout;
+    while (remaining > 0) {
+      if (SDL_WaitEventTimeout(&event, remaining)) {
+        waitForQuit(event);
+      }
+      
+      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                         std::chrono::steady_clock::now() - startTime)
+                         .count();
+      remaining = timeout - elapsed;
+    }
+  } else {
+    bool waiting = true;
 
-      // Nếu có tương tác (nhấn phím hoặc click chuột) -> kết thúc pause
-      if (event.type == SDL_KEYDOWN || event.type == SDL_MOUSEBUTTONDOWN) {
-        waiting = false;
+    while (waiting) {
+      if (SDL_WaitEvent(&event)) {
+        waitForQuit(event);
+
+        if (event.type == SDL_KEYDOWN || event.type == SDL_MOUSEBUTTONDOWN) {
+          waiting = false;
+        }
       }
     }
   }
