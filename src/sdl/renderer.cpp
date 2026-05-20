@@ -531,7 +531,52 @@ void SDLRenderer::showMove(const int row, const int col) {}
  * TODO:
  *   - Bước 1: Render thông báo lỗi.
  */
-void SDLRenderer::showInvalidMove() {}
+void SDLRenderer::showInvalidMove() {
+  std::string msg = "[!] Invalid move!";
+
+  // Use regular font
+  SDL_Color errorTextColor = {255, 255, 255, 255}; // White text
+  SDL_Surface *textSurface =
+      TTF_RenderUTF8_Blended(regularFont, msg.c_str(), errorTextColor);
+  if (!textSurface)
+    return;
+
+  SDL_Texture *textTexture =
+      SDL_CreateTextureFromSurface(renderer, textSurface);
+  if (!textTexture) {
+    SDL_FreeSurface(textSurface);
+    return;
+  }
+
+  int textW = textSurface->w;
+  int textH = textSurface->h;
+
+  int paddingX = 16;
+  int paddingY = 12;
+  int bubbleW = textW + paddingX * 2;
+  int bubbleH = textH + paddingY * 2;
+
+  int margin = 20;
+  int bx = screenWidth - bubbleW - margin;
+  int by = margin;
+
+  // Draw bubble background (semi-transparent dark gray/black for high contrast)
+  SDL_Color bgColor = {33, 33, 33, 240};
+  drawRect(bx, by, bubbleW, bubbleH, bgColor, true);
+
+  // Draw bubble border (crimson red)
+  SDL_Color borderColor = {235, 64, 52, 255};
+  drawRect(bx, by, bubbleW, bubbleH, borderColor, false);
+  // Add a 2nd layer of border to make it look a bit sharper/thicker (2px border)
+  drawRect(bx - 1, by - 1, bubbleW + 2, bubbleH + 2, borderColor, false);
+
+  // Render text inside
+  SDL_Rect destRect = {bx + paddingX, by + paddingY, textW, textH};
+  SDL_RenderCopy(renderer, textTexture, NULL, &destRect);
+
+  SDL_FreeSurface(textSurface);
+  SDL_DestroyTexture(textTexture);
+}
 
 /**
  * Mô tả: Hiển thị người chơi hiện tại.

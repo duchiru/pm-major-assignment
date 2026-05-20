@@ -331,6 +331,7 @@ GameResult Engine::playGame() {
 
   int row = gameSetup.size / 2, col = gameSetup.size / 2; // default to center
   bool making_move = true; // whether wait for user
+  bool invalid_move = false;
 
   // Game Loop
   while (is_running) {
@@ -345,6 +346,11 @@ GameResult Engine::playGame() {
     if (config->interactive) {
       iRenderer->clearScreen(); // clear screen (new frame)
       iRenderer->displayBoard(gameSetup.board, gameSetup.size); // render board
+
+      if (invalid_move) {
+        iRenderer->showInvalidMove();
+      }
+
       iRenderer->showPlayer(player, is_bot[player]); // show current player
     }
 
@@ -374,9 +380,17 @@ GameResult Engine::playGame() {
           iRenderer->renderFrame();
         }
 
-        if (iInteraction->getPlayerMove(&row, &col, gameSetup.size))
-          if (Logic::isValidMove(gameSetup.board, gameSetup.size, row, col))
-            making_move = false; // Found a valid move
+        if (iInteraction->getPlayerMove(&row, &col, gameSetup.size)) {
+          // Player made a move
+          if (Logic::isValidMove(gameSetup.board, gameSetup.size, row, col)) {
+            // Found a valid move
+            making_move = false;
+            invalid_move = false;
+          } else {
+            // Invalid move
+            invalid_move = true;
+          }
+        }
       }
     }
 

@@ -278,7 +278,7 @@ bool TerminalInteraction::getPlayerMove(int *row, int *col, const int size)
     if (!getInput(col))
         return false;
 
-    return (0 <= *row && *row < size && 0 <= *col && *col < size);
+    return true;
 }
 
 /**
