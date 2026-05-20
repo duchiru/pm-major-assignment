@@ -49,7 +49,7 @@ TerminalRenderer::~TerminalRenderer()
  */
 void TerminalRenderer::init(const RunConfig &config)
 {
-    clearScreen();
+    if (config.interactive) clearScreen();
 }
 
 /**
