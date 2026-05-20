@@ -36,7 +36,7 @@
  */
 class BotLevel3 : public BotLevel2 {
    protected:
-    static const int MAX_DEPTH = 8; // độ sâu backtrack tối đa cho thuật toán
+    static const int MAX_DEPTH = 4; // độ sâu backtrack tối đa cho thuật toán
 
     /**
      * Mô tả:
@@ -59,7 +59,7 @@ class BotLevel3 : public BotLevel2 {
      */
     pII hard_level(char board[][BOARD_N_MAX], const int size, const int goal);
 
-    ll minimax(char board[][BOARD_N_MAX], const int size, const int goal);
+    ll minimax(char board[][BOARD_N_MAX], const int size, const int goal, int depth, bool isMax, ll alpha, ll beta);
 
     /**
      * Hàm đánh giá thế trận cho thuật toán Minimax.
