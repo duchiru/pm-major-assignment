@@ -135,126 +135,140 @@ void Engine::startGame() {
     return;
   }
 
-  if (config->interactive) {
-    iRenderer->clearScreen();
-    iRenderer->showSelectMenu(SelectType::TITLE_UI);
-    iInteraction->pause();
-  }
+  SelectType currentSelectMenu = SelectType::TITLE_UI;
+  int context = NO_CONTEXT;
+  bool settingUp = true, preservePrevFrame = false;
 
-  bool isSlected;
+  while (settingUp) {
+    if (config->interactive) {
+      if (preservePrevFrame) {
+        preservePrevFrame = false;
+      } else {
+        iRenderer->clearScreen();
+      }
 
-  // chọn kích thước bàn cờ
-  do {
-    if (config->interactive)
-      iRenderer->showSelectMenu(SelectType::SIZE_UI);
-    isSlected = iInteraction->selectSize(&gameSetup.size);
+      iRenderer->showSelectMenu(currentSelectMenu, context);
+    }
 
-    if (config->interactive && !isSlected)
-      iRenderer->showInvalidSelect(SelectType::SIZE_UI, gameSetup.size);
-  } while (!isSlected);
+    switch (currentSelectMenu) {
+    case SelectType::TITLE_UI: {
+      if (config->interactive) {
+        iRenderer->renderFrame();
+        iInteraction->pause();
+      }
 
-  if (config->interactive)
-    iRenderer->showValidSelect(SelectType::SIZE_UI, gameSetup.size);
+      currentSelectMenu = SelectType::SIZE_UI;
 
-  Logger::log(std::format("user input 'size' = {}", gameSetup.size),
-              Logger::Level::DEBUG);
+      break;
+    }
 
-  // chọn điều kiện thắng (goal)
-  do {
-    if (config->interactive)
-      iRenderer->showSelectMenu(SelectType::GOAL_UI, gameSetup.size);
-    isSlected = iInteraction->selectGoal(&gameSetup.goal, gameSetup.size);
+    case SelectType::SIZE_UI: {
+      if (config->interactive) {
+        iRenderer->renderFrame();
+      }
 
-    if (config->interactive && !isSlected)
-      iRenderer->showInvalidSelect(SelectType::GOAL_UI, gameSetup.goal);
-  } while (!isSlected);
+      if (iInteraction->selectSize(&gameSetup.size)) {
+        currentSelectMenu = SelectType::GOAL_UI;
+        context = gameSetup.size;
+      } else {
+        if (config->interactive) {
+          iRenderer->showInvalidSelect(SelectType::SIZE_UI, gameSetup.size);
+          preservePrevFrame = true;
+        }
+      }
 
-  if (config->interactive)
-    iRenderer->showValidSelect(SelectType::GOAL_UI, gameSetup.goal);
+      break;
+    }
 
-  Logger::log(std::format("user input 'goal' = {}", gameSetup.goal),
-              Logger::Level::DEBUG);
+    case SelectType::GOAL_UI: {
+      if (config->interactive) {
+        iRenderer->renderFrame();
+      }
 
-  // chọn mode chơi
-  do {
-    if (config->interactive)
-      iRenderer->showSelectMenu(SelectType::GAME_MODE_UI);
-    isSlected = iInteraction->selectGameMode(&gameSetup.mode);
+      if (iInteraction->selectGoal(&gameSetup.goal, gameSetup.size)) {
+        currentSelectMenu = SelectType::GAME_MODE_UI;
+        context = NO_CONTEXT;
+      } else {
+        if (config->interactive) {
+          iRenderer->showInvalidSelect(SelectType::GOAL_UI, gameSetup.goal);
+          preservePrevFrame = true;
+        }
+      }
 
-    if (config->interactive && !isSlected)
-      iRenderer->showInvalidSelect(SelectType::GAME_MODE_UI,
-                                   (int)gameSetup.mode);
-  } while (!isSlected);
+      break;
+    }
 
-  if (config->interactive)
-    iRenderer->showValidSelect(SelectType::GAME_MODE_UI, (int)gameSetup.mode);
+    case SelectType::GAME_MODE_UI: {
+      if (config->interactive) {
+        iRenderer->renderFrame();
+      }
 
-  Logger::log(std::format("user input 'game mode' = {}",
-                          modeToString((int)gameSetup.mode)),
-              Logger::Level::DEBUG);
+      if (iInteraction->selectGameMode(&gameSetup.mode)) {
+        if (gameSetup.mode == GameMode::PVE) {
+          currentSelectMenu = SelectType::BOT_LEVEL_UI;
+          context = NO_CONTEXT;
+        } else if (gameSetup.mode == GameMode::EVE) {
+          currentSelectMenu = SelectType::MUL_BOT_LEVEL_UI;
+          context = 0;
+        } else if (gameSetup.mode == GameMode::PVP) {
+          settingUp = false;
+          context = NO_CONTEXT;
+        }
+      } else {
+        if (config->interactive) {
+          iRenderer->showInvalidSelect(SelectType::GAME_MODE_UI,
+                                       (int)gameSetup.mode);
+          preservePrevFrame = true;
+        }
+      }
 
-  // mode Player vs Bot
-  if (gameSetup.mode == GameMode::PVE) {
-    do {
-      if (config->interactive)
-        iRenderer->showSelectMenu(SelectType::BOT_LEVEL_UI);
-      isSlected = iInteraction->selectBotLevel(gameSetup.levels, 1);
+      break;
+    }
 
-      if (config->interactive && !isSlected)
-        iRenderer->showInvalidSelect(SelectType::BOT_LEVEL_UI,
-                                     (int)gameSetup.levels[1]);
-    } while (!isSlected);
+    case SelectType::BOT_LEVEL_UI: {
+      if (config->interactive) {
+        iRenderer->renderFrame();
+      }
 
-    if (config->interactive)
-      iRenderer->showValidSelect(SelectType::BOT_LEVEL_UI,
-                                 (int)gameSetup.levels[1]);
+      if (iInteraction->selectBotLevel(gameSetup.levels, 1)) {
+        settingUp = false;
+      } else {
+        if (config->interactive) {
+          iRenderer->showInvalidSelect(SelectType::BOT_LEVEL_UI,
+                                       (int)gameSetup.levels[1]);
+          preservePrevFrame = true;
+        }
+      }
 
-    Logger::log(std::format("user input 'bot level' = {}",
-                            botToString((int)gameSetup.levels[1])),
-                Logger::Level::DEBUG);
-  }
+      settingUp = false;
+      context = NO_CONTEXT;
 
-  // mode Bot vs Bot
-  if (gameSetup.mode == GameMode::EVE) {
-    // bot 0
-    do {
-      if (config->interactive)
-        iRenderer->showSelectMenu(SelectType::MUL_BOT_LEVEL_UI, 0);
-      isSlected = iInteraction->selectBotLevel(gameSetup.levels, 0);
+      break;
+    }
 
-      if (config->interactive && !isSlected)
-        iRenderer->showInvalidSelect(SelectType::MUL_BOT_LEVEL_UI,
-                                     (int)gameSetup.levels[0]);
+    case SelectType::MUL_BOT_LEVEL_UI: {
+      if (config->interactive) {
+        iRenderer->renderFrame();
+      }
 
-    } while (!isSlected);
+      if (iInteraction->selectBotLevel(gameSetup.levels, context)) {
+        settingUp = false;
+      } else {
+        if (config->interactive) {
+          iRenderer->showInvalidSelect(SelectType::MUL_BOT_LEVEL_UI,
+                                       (int)gameSetup.levels[1]);
+          preservePrevFrame = true;
+        }
+      }
 
-    if (config->interactive)
-      iRenderer->showValidSelect(SelectType::MUL_BOT_LEVEL_UI,
-                                 (int)gameSetup.levels[0]);
+      if (context == 1) {
+        settingUp = false;
+        context = NO_CONTEXT;
+      }
 
-    Logger::log(std::format("user input 'bot level[0]' = {}",
-                            botToString((int)gameSetup.levels[0])),
-                Logger::Level::DEBUG);
-
-    // bot 1
-    do {
-      if (config->interactive)
-        iRenderer->showSelectMenu(SelectType::MUL_BOT_LEVEL_UI, 1);
-      isSlected = iInteraction->selectBotLevel(gameSetup.levels, 1);
-
-      if (config->interactive && !isSlected)
-        iRenderer->showInvalidSelect(SelectType::MUL_BOT_LEVEL_UI,
-                                     (int)gameSetup.levels[1]);
-
-    } while (!isSlected);
-
-    if (config->interactive)
-      iRenderer->showValidSelect(SelectType::MUL_BOT_LEVEL_UI,
-                                 (int)gameSetup.levels[1]);
-
-    Logger::log(std::format("user input 'bot level[1]' = {}",
-                            botToString((int)gameSetup.levels[1])),
-                Logger::Level::DEBUG);
+      break;
+    }
+    }
   }
 
   // khởi tạo board rỗng
