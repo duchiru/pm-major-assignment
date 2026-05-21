@@ -122,10 +122,6 @@ void SDLRenderer::drawRect(int x, int y, int w, int h, SDL_Color color,
  *   - Trường hợp biên: selectType không hợp lệ.
  */
 void SDLRenderer::showSelectMenu(SelectType selectType, int context) {
-  if (selectType != SelectType::PLAYER_UI) {
-    clearScreen();
-  }
-
   int w = this->screenWidth, h = this->screenHeight;
 
   switch (selectType) {
