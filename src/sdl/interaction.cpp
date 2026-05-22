@@ -6,6 +6,8 @@
 #include "interaction.h"
 #include <SDL_events.h>
 #include <chrono>
+#include "../utils/logger.h"
+#include <format>
 
 /* ---------- Definitions ---------- */
 
@@ -130,6 +132,8 @@ bool SDLInteraction::selectSize(int *size) {
         int mx = event.button.x;
         int my = event.button.y;
 
+        Logger::debug(std::format("Mouse clicked at ({}, {})", mx, my));
+
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
           int idxx = (mx - startX) / (this->buttonWidth + this->gapX);
@@ -172,6 +176,8 @@ bool SDLInteraction::selectGoal(int *goal, const int size) {
         int mx = event.button.x;
         int my = event.button.y;
 
+        Logger::debug(std::format("Mouse clicked at ({}, {})", mx, my));
+
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
           int idx = (mx - startX) / (this->buttonWidth + this->gapX);
@@ -210,6 +216,8 @@ bool SDLInteraction::selectGameMode(GameMode *mode) {
 
         int mx = event.button.x;
         int my = event.button.y;
+
+        Logger::debug(std::format("Mouse clicked at ({}, {})", mx, my));
 
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
@@ -251,6 +259,8 @@ bool SDLInteraction::selectBotLevel(BotLevel *levels, const int index) {
         int mx = event.button.x;
         int my = event.button.y;
 
+        Logger::debug(std::format("Mouse clicked at ({}, {})", mx, my));
+
         if (startX <= mx && mx <= startX + totalW && startY <= my &&
             my <= startY + totalH) {
           int idx = (mx - startX) / (this->buttonWidth + this->gapX);
@@ -291,6 +301,8 @@ bool SDLInteraction::getPlayerMove(int *row, int *col, const int size) {
 
       int mx = event.button.x;
       int my = event.button.y;
+
+      Logger::debug(std::format("Mouse clicked at ({}, {})", mx, my));
 
       if (startX <= mx && mx <= startX + cellSize * size && startY <= my &&
           my <= startY + cellSize * size) {

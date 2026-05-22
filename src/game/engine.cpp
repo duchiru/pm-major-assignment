@@ -8,6 +8,7 @@
 /* ---------- Importing ---------- */
 
 #include <chrono>
+#include <format>
 #include <optional>
 #include <sstream>
 #include <thread>
@@ -436,6 +437,8 @@ GameResult Engine::playGame() {
     auto end_time = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
         end_time - start_time);
+
+    Logger::debug(std::format("Last frame took {} ms to render", elapsed.count()));
 
     // If we finished early, sleep until the next frame should start
     if (elapsed < frame_duration) {

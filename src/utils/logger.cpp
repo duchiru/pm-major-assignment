@@ -59,7 +59,7 @@ void Logger::init(bool judge_mode, bool to_file, const std::string& path, bool v
     }
 
     // tạo header log
-    std::string header = "Tic-tac-toe Game (Version: " + std::string(VERSION) + " by baluong.87)\n";
+    std::string header = "Tic-tac-toe Game (Version: " + std::string(VERSION) + " by duchiru)\n";
     header += std::string(48, '-');
 
     // ghi header ra file hoặc console
