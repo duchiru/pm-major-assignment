@@ -1,5 +1,13 @@
 /**
- * Engine implementation
+ * Engine implementation (Level 3 -- shell layer)
+ *
+ * Mô tả:
+ *   Engine phối hợp pure functions (core/) với IO (interface/ + terminal/).
+ *   Khác biệt so với level 2:
+ *     - Logger được inject (logger_->log) thay vì global
+ *     - RNG được inject (rng_) thay vì global
+ *     - Board bất biến -- dùng core::applyTurn
+ *     - Bot là hàm (BotFn) thay vì class hierarchy
  */
 
 #include "engine.h"
@@ -7,6 +15,7 @@
 /* ---------- Importing ---------- */
 
 #include <chrono>
+#include <format>
 #include <sstream>
 #include <thread>
 
@@ -51,7 +60,6 @@ bool Engine::sanity_check() {
         ok = false;
     }
     if (!logger_) {
-        // không log được, nhưng vẫn fail safety check
         ok = false;
     }
     if (!rng_) {
@@ -64,12 +72,9 @@ bool Engine::sanity_check() {
 /* ---------- startGame ---------- */
 
 /**
- * Mô tả: Lấy input cấu hình từ user (size, goal, mode, bot levels).
- *
- * TODO (mức 1 -- task 3, đã được Logger DI):
- *   - Cài đặt giống level 2, NHƯNG dùng `logger_->log(...)` thay vì
- *     `Logger::log(...)`.
- *   - Sau khi xong: khởi tạo `gameState_` bằng `core::initBoard(...)`.
+ * Mô tả: Setup game -- lấy size/goal/mode/bot levels từ user.
+ * Dùng logger_->log thay vì Logger::log (DI).
+ * Khởi tạo gameState_ bằng core::initBoard.
  */
 void Engine::startGame() {
     if (logger_) logger_->log("[Engine] Starting game . . .");
@@ -79,47 +84,134 @@ void Engine::startGame() {
         return;
     }
 
-    // TODO (mức 1 -- task 3):
-    //   1. Hiển thị title (showSelectMenu(SelectType::TITLE_UI)).
-    //   2. Lấy size, goal, mode, bot levels -- pattern do-while giống level 2.
-    //   3. Khởi tạo gameState_:
-    //        gameState_.board         = core::initBoard(gameSetup_.size);
-    //        gameState_.currentPlayer = 0;
-    //        gameState_.turn          = 0;
-    //        gameState_.winner        = -1;
-    //        gameState_.isFinished    = false;
-    //
-    //   QUAN TRỌNG: thay mọi `Logger::log(...)` bằng `logger_->log(...)`.
-    throw NotImplementedException();
+    SelectType currentSelectMenu = SelectType::TITLE_UI;
+    int context = NO_CONTEXT;
+    bool settingUp = true, preservePrevFrame = false;
+
+    while (settingUp) {
+        if (config_->interactive) {
+            if (preservePrevFrame) {
+                preservePrevFrame = false;
+            } else {
+                iRenderer_->clearScreen();
+            }
+
+            iRenderer_->showSelectMenu(currentSelectMenu, context);
+        }
+
+        switch (currentSelectMenu) {
+        case SelectType::TITLE_UI: {
+            if (config_->interactive) {
+                iInteraction_->pause();
+            }
+            currentSelectMenu = SelectType::SIZE_UI;
+            break;
+        }
+
+        case SelectType::SIZE_UI: {
+            if (iInteraction_->selectSize(&gameSetup_.size)) {
+                currentSelectMenu = SelectType::GOAL_UI;
+                context = gameSetup_.size;
+            } else {
+                if (config_->interactive) {
+                    iRenderer_->showInvalidSelect(SelectType::SIZE_UI, gameSetup_.size);
+                    preservePrevFrame = true;
+                }
+            }
+            break;
+        }
+
+        case SelectType::GOAL_UI: {
+            if (iInteraction_->selectGoal(&gameSetup_.goal, gameSetup_.size)) {
+                currentSelectMenu = SelectType::GAME_MODE_UI;
+                context = NO_CONTEXT;
+            } else {
+                if (config_->interactive) {
+                    iRenderer_->showInvalidSelect(SelectType::GOAL_UI, gameSetup_.goal);
+                    preservePrevFrame = true;
+                }
+            }
+            break;
+        }
+
+        case SelectType::GAME_MODE_UI: {
+            if (iInteraction_->selectGameMode(&gameSetup_.mode)) {
+                if (gameSetup_.mode == GameMode::PVE) {
+                    currentSelectMenu = SelectType::BOT_LEVEL_UI;
+                    context = NO_CONTEXT;
+                } else if (gameSetup_.mode == GameMode::EVE) {
+                    currentSelectMenu = SelectType::MUL_BOT_LEVEL_UI;
+                    context = 0;
+                } else if (gameSetup_.mode == GameMode::PVP) {
+                    settingUp = false;
+                    context = NO_CONTEXT;
+                }
+            } else {
+                if (config_->interactive) {
+                    iRenderer_->showInvalidSelect(SelectType::GAME_MODE_UI,
+                                                 static_cast<int>(gameSetup_.mode));
+                    preservePrevFrame = true;
+                }
+            }
+            break;
+        }
+
+        case SelectType::BOT_LEVEL_UI: {
+            if (iInteraction_->selectBotLevel(gameSetup_.levels.data(), 1)) {
+                settingUp = false;
+            } else {
+                if (config_->interactive) {
+                    iRenderer_->showInvalidSelect(SelectType::BOT_LEVEL_UI,
+                                                 static_cast<int>(gameSetup_.levels[1]));
+                    preservePrevFrame = true;
+                }
+            }
+            settingUp = false;
+            context = NO_CONTEXT;
+            break;
+        }
+
+        case SelectType::MUL_BOT_LEVEL_UI: {
+            if (iInteraction_->selectBotLevel(gameSetup_.levels.data(), context)) {
+                if (context == 1) {
+                    settingUp = false;
+                    context = NO_CONTEXT;
+                } else {
+                    context = 1;
+                }
+            } else {
+                if (config_->interactive) {
+                    iRenderer_->showInvalidSelect(SelectType::MUL_BOT_LEVEL_UI,
+                                                 static_cast<int>(gameSetup_.levels[context]));
+                    preservePrevFrame = true;
+                }
+            }
+            break;
+        }
+
+        default:
+            break;
+        }
+    }
+
+    // Khởi tạo gameState_ bằng core::initBoard (immutable)
+    gameState_.board = core::initBoard(gameSetup_.size);
+    gameState_.currentPlayer = 0;
+    gameState_.turn = 0;
+    gameState_.winner = -1;
+    gameState_.isFinished = false;
+
+    if (logger_) logger_->log("Board initialized!");
+    if (logger_) logger_->log("[Engine] Game started!");
 }
 
 /* ---------- playGame ---------- */
 
 /**
- * Mô tả: Game loop CHÍNH.
- *
- * TODO:
- *   ── Mức 1 (task 3): chỉ cần thay Logger global → logger_-> ──
- *      Có thể giữ tinh thần while-loop của level 2.
- *
- *   ── Mức 2 (Engine): KHÔNG mutate board ──
- *      Thay vì:
- *          Logic::makeMove(gameSetup.board, row, col, symbols[player]);
- *      dùng:
- *          gameState_ = core::applyTurn(gameState_, {row, col}, gameSetup_.goal);
- *
- *      Loop dừng khi `gameState_.isFinished == true`.
- *
- *      Khuyến khích: viết `playGame` thành một đệ quy đuôi:
- *          GameResult loop(GameState s) {
- *              if (s.isFinished) return result_of(s);
- *              auto move  = nextMove(s);
- *              auto next  = core::applyTurn(s, move, goal);
- *              return loop(next);   // tail call
- *          }
- *      → minh hoạ rõ "game loop là một fold".
- *
- * Trả về: GameResult.
+ * Mô tả: Game loop chính.
+ *   - Dùng core::applyTurn cho immutable state transitions
+ *   - Dùng bot::makeBot (HOF factory) thay vì class hierarchy
+ *   - Dùng logger_->log thay vì Logger::log
  */
 GameResult Engine::playGame() {
     if (logger_) logger_->log("[Engine] Playing game . . .");
@@ -131,25 +223,112 @@ GameResult Engine::playGame() {
         return gameResult;
     }
 
-    // TODO (mức 1+2): cài đặt game loop theo gợi ý ở trên.
-    //
-    // Gợi ý mức 1: cụ thể hoá bot bằng FP factory:
-    //   bot::BotFn bot0 = (mode == EVE)
-    //                       ? bot::makeBot(gameSetup_.levels[0], gameSetup_.goal)
-    //                       : bot::BotFn{};
-    //   bot::BotFn bot1 = (mode != PVP)
-    //                       ? bot::makeBot(gameSetup_.levels[1], gameSetup_.goal)
-    //                       : bot::BotFn{};
-    //
-    // Gợi ý đo thời gian (mức 1+3B):
-    //   auto move = measureExecutionTime(
-    //       "bot->getMove",
-    //       [&]{ return bot1(gameState_, *rng_); },
-    //       config_->verbose_flag,
-    //       [this](const std::string& m){ logger_->log(m, Logger::Level::DEBUG); }
-    //   );
+    // Thiết lập bot flags
+    bool is_bot[2] = {
+        gameSetup_.mode == GameMode::EVE,
+        gameSetup_.mode != GameMode::PVP,
+    };
 
-    throw NotImplementedException();
+    // Tạo bot bằng FP factory (HOF)
+    bot::BotFn bots[2];
+    if (gameSetup_.mode == GameMode::EVE) {
+        bots[0] = bot::makeBot(gameSetup_.levels[0], gameSetup_.goal);
+        bots[1] = bot::makeBot(gameSetup_.levels[1], gameSetup_.goal);
+    } else if (gameSetup_.mode == GameMode::PVE) {
+        bots[0] = bot::BotFn{};  // player 0 là human
+        bots[1] = bot::makeBot(gameSetup_.levels[1], gameSetup_.goal);
+    }
+    // PVP: cả hai đều null
+
+    bool making_move = true;
+    bool invalid_move = false;
+    int row = gameSetup_.size / 2, col = gameSetup_.size / 2;
+
+    // Game Loop
+    while (!gameState_.isFinished) {
+        int player = gameState_.currentPlayer;
+
+        if (config_->interactive) {
+            iRenderer_->clearScreen();
+            iRenderer_->displayBoard(gameState_.board);
+
+            if (invalid_move) {
+                iRenderer_->showInvalidMove();
+            }
+
+            iRenderer_->showPlayer(player, is_bot[player]);
+        }
+
+        // 1. Get Move
+        if (is_bot[player]) {
+            if (bots[player]) {
+                // Đo thời gian bot bằng HOF measureExecutionTime
+                Move botMove = measureExecutionTime(
+                    std::format("bot#{}", player),
+                    [&]() { return bots[player](gameState_, *rng_); },
+                    config_->verbose_flag,
+                    [this](const std::string& m) {
+                        logger_->log(m, Logger::Level::DEBUG);
+                    }
+                );
+
+                row = botMove.row;
+                col = botMove.col;
+                making_move = false;
+            }
+        } else {
+            if (making_move) {
+                if (config_->interactive) {
+                    iRenderer_->showSelectMenu(SelectType::PLAYER_UI,
+                                              row * gameSetup_.size + col);
+                }
+
+                if (iInteraction_->getPlayerMove(&row, &col)) {
+                    Move move{row, col};
+                    if (core::isValidMove(gameState_.board, move)) {
+                        making_move = false;
+                        invalid_move = false;
+                    } else {
+                        invalid_move = true;
+                    }
+                }
+            }
+        }
+
+        if (!making_move) {
+            Move move{row, col};
+
+            if (config_->interactive)
+                iRenderer_->showMove(row, col);
+
+            if (logger_) {
+                logger_->log(std::format("player {} make move to ({}, {})",
+                                         player + 1, row, col),
+                             Logger::Level::DEBUG);
+            }
+
+            // Delay khi bot chơi (side-effect)
+            if (is_bot[player] && config_->interactive) {
+                iInteraction_->pause(SLEEP_TIME);
+            }
+
+            // Áp dụng nước đi bằng applyTurn (IMMUTABLE)
+            gameState_ = core::applyTurn(gameState_, move, gameSetup_.goal);
+
+            // Cập nhật game result
+            gameResult.turns = gameState_.turn;
+            if (gameState_.isFinished) {
+                gameResult.winner = gameState_.winner;
+                gameResult.isBot = (gameState_.winner >= 0) ? is_bot[gameState_.winner] : false;
+            }
+
+            // Reset cho nước đi tiếp
+            making_move = true;
+            invalid_move = false;
+        }
+    }
+
+    if (logger_) logger_->log("[Engine] Game done!");
     return gameResult;
 }
 
@@ -157,12 +336,8 @@ GameResult Engine::playGame() {
 
 /**
  * Mô tả: Hiển thị kết quả game.
- *
- * TODO (mức 1 -- task 3):
- *   - Giống level 2 nhưng dùng logger_->log(...).
- *   - Truyền `gameState_.board` (immutable) vào renderer thay vì mảng cũ.
  */
-void Engine::endGame(const GameResult& /*gameResult*/) {
+void Engine::endGame(const GameResult& gameResult) {
     if (logger_) logger_->log("[Engine] Ending game . . .");
 
     if (!sanity_check()) {
@@ -170,8 +345,48 @@ void Engine::endGame(const GameResult& /*gameResult*/) {
         return;
     }
 
-    // TODO (mức 1)
-    throw NotImplementedException();
+    if (config_->interactive) {
+        iRenderer_->clearScreen();
+        iRenderer_->displayBoard(gameState_.board);
+
+        char symbol = (gameResult.winner == 0) ? SYMBOL_X : SYMBOL_O;
+
+        // Lấy đường thắng (pure function)
+        auto winLine = core::getWinLine(gameState_.board, symbol,
+                                         gameSetup_.goal);
+
+        if (winLine && logger_) {
+            std::string s = "[WinLine] cells: ";
+            for (auto [r, c] : winLine->cells)
+                s += std::format("({}, {}) ", r, c);
+            logger_->log(s, Logger::Level::DEBUG);
+        } else if (logger_) {
+            logger_->log("[WinLine] none", Logger::Level::DEBUG);
+        }
+
+        iRenderer_->showResult(gameResult.winner, gameResult.isBot,
+                               winLine ? &(*winLine) : nullptr);
+        iInteraction_->pause();
+    } else if (config_->judge_mode) {
+        iRenderer_->printResult(gameResult);
+    }
+
+    // Log thống kê
+    if (logger_) {
+        logger_->log(std::format("after {} turns", gameResult.turns),
+                     Logger::Level::DEBUG);
+
+        std::string resultMsg = "game end with result: ";
+        if (gameResult.winner == -1)
+            resultMsg += "draw";
+        else
+            resultMsg += std::format("player {} ({}) win!",
+                                     gameResult.winner + 1,
+                                     gameResult.isBot ? "bot" : "human");
+        logger_->log(resultMsg, Logger::Level::DEBUG);
+    }
+
+    if (logger_) logger_->log("[Engine] Game ended!");
 }
 
 /* ---------- close ---------- */
