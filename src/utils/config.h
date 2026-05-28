@@ -18,7 +18,7 @@
 
 // version của chương trình
 // TODO: sửa <STUDENT_ID> bằng mã số sinh viên
-inline const std::string VERSION = "0.5.<STUDENT_ID>";
+inline const std::string VERSION = "0.5.25023070";
 
 /* ---------- Type Definitions ---------- */
 
