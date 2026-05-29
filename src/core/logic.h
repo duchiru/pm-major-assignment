@@ -146,6 +146,7 @@ constexpr char opponentOf(char symbol) noexcept {
 }
 
 
+extern "C" {
 /**
  * Mô tả:
  *   Đếm số ô của `symbol` trên board.
@@ -155,6 +156,7 @@ constexpr char opponentOf(char symbol) noexcept {
  *        khi isValidMove(b,m)).
  *     - viết bằng đệ quy đuôi.
  */
-int countSymbol(const Board& board, char symbol);
+int countSymbol(const Board& board, char symbol, Move move = {0, 0}, int acc = 0);
+}
 
 }  // namespace core

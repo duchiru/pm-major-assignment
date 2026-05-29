@@ -22,6 +22,8 @@
 #include "../core/bot_pure.h"
 #include "../core/logic.h"
 #include "../utils/helper.h"
+#include "core/types.h"
+#include "logger.h"
 
 /* ---------- Definitions ---------- */
 
@@ -112,6 +114,9 @@ void Engine::startGame() {
             if (iInteraction_->selectSize(&gameSetup_.size)) {
                 currentSelectMenu = SelectType::GOAL_UI;
                 context = gameSetup_.size;
+
+                iRenderer_->showValidSelect(SelectType::SIZE_UI, gameSetup_.size);
+                logger_->log(std::format("'size' is set to {}", gameSetup_.size), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
                     iRenderer_->showInvalidSelect(SelectType::SIZE_UI, gameSetup_.size);
@@ -125,6 +130,9 @@ void Engine::startGame() {
             if (iInteraction_->selectGoal(&gameSetup_.goal, gameSetup_.size)) {
                 currentSelectMenu = SelectType::GAME_MODE_UI;
                 context = NO_CONTEXT;
+
+                iRenderer_->showValidSelect(SelectType::GOAL_UI, gameSetup_.goal);
+                logger_->log(std::format("'goal' is set to {}", gameSetup_.goal), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
                     iRenderer_->showInvalidSelect(SelectType::GOAL_UI, gameSetup_.goal);
@@ -146,10 +154,13 @@ void Engine::startGame() {
                     settingUp = false;
                     context = NO_CONTEXT;
                 }
+
+                iRenderer_->showValidSelect(SelectType::GAME_MODE_UI, (int)(gameSetup_.mode));
+                logger_->log(std::format("'mode' is set to {}", modeToString((int)gameSetup_.mode)), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
                     iRenderer_->showInvalidSelect(SelectType::GAME_MODE_UI,
-                                                 static_cast<int>(gameSetup_.mode));
+                                                 (int)(gameSetup_.mode));
                     preservePrevFrame = true;
                 }
             }
@@ -159,10 +170,13 @@ void Engine::startGame() {
         case SelectType::BOT_LEVEL_UI: {
             if (iInteraction_->selectBotLevel(gameSetup_.levels.data(), 1)) {
                 settingUp = false;
+
+                iRenderer_->showValidSelect(SelectType::BOT_LEVEL_UI, (int)(gameSetup_.levels[1]));
+                logger_->log(std::format("'bot level' is set to {}", botToString((int)gameSetup_.levels[1])), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
                     iRenderer_->showInvalidSelect(SelectType::BOT_LEVEL_UI,
-                                                 static_cast<int>(gameSetup_.levels[1]));
+                                                 (int)(gameSetup_.levels[1]));
                     preservePrevFrame = true;
                 }
             }
@@ -179,10 +193,13 @@ void Engine::startGame() {
                 } else {
                     context = 1;
                 }
+
+                iRenderer_->showValidSelect(SelectType::MUL_BOT_LEVEL_UI, (int)(gameSetup_.levels[context]));
+                logger_->log(std::format("'bot {} level' is set to {}", context, botToString((int)gameSetup_.levels[context])), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
                     iRenderer_->showInvalidSelect(SelectType::MUL_BOT_LEVEL_UI,
-                                                 static_cast<int>(gameSetup_.levels[context]));
+                                                 (int)(gameSetup_.levels[context]));
                     preservePrevFrame = true;
                 }
             }

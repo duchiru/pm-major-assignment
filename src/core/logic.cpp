@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "pipeline.h"
+#include "types.h"
 
 namespace core {
 
@@ -392,18 +393,10 @@ std::optional<WinLine> getWinLine(const Board& board, char symbol,
  *   countSymbol(applyMove(b, m, s), s) = countSymbol(b, s) + 1
  *   với điều kiện isValidMove(b, m) == true.
  */
-int countSymbol(const Board& board, char symbol) {
-    auto counter = fp::pipe(
-        [](const Board& b) { return enumerateCells(b); },
-        fp::filter([&](Move m) {
-            return board.at(m.row, m.col) == symbol;
-        }),
-        fp::reduce(0, [](int acc, const Move& /*m*/) {
-            return acc + 1;
-        })
-    );
-
-    return counter(board);
+int countSymbol(const Board& board, char symbol, Move move, int acc) {
+    if (move.row >= board.size) return acc;
+    if (move.col >= board.size) return countSymbol(board, symbol, {move.row + 1, 0}, acc);
+    return countSymbol(board, symbol, {move.row, move.col + 1}, acc + (board.at(move.row, move.col) == symbol));
 }
 
 }  // namespace core

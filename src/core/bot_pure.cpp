@@ -29,9 +29,6 @@ static const int MAX_DEPTH = 4;
 static const int BOT_SCORE_INF = 1000;
 static const int BOT_EVALUATE_SCORE = 10;
 
-/**
- * Mô tả: Hàm lũy thừa (pure, không overflow check).
- */
 static ll power(ll base, int exp) {
     ll result = 1;
     for (int i = exp; i > 0; i >>= 1) {
@@ -41,10 +38,6 @@ static ll power(ll base, int exp) {
     return result;
 }
 
-/**
- * Mô tả: Đánh giá heuristic cho trạng thái bàn cờ.
- * Pure -- port từ level 2 BotLevel3::evaluate, dùng Board API.
- */
 static ll evaluate(const Board& board, int goal, char selfSymbol, char opSymbol) {
     ll score = 0;
     int size = board.size;
@@ -84,10 +77,6 @@ static ll evaluate(const Board& board, int goal, char selfSymbol, char opSymbol)
     return score;
 }
 
-/**
- * Mô tả: Minimax + Alpha-Beta Pruning.
- * Pure -- dùng core::applyMove (immutable) thay vì mutate board.
- */
 static ll minimax(const Board& board, int size, int goal,
                   char botSymbol, char opSymbol,
                   int depth, bool isMax, ll alpha, ll beta) {
