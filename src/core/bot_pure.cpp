@@ -186,7 +186,7 @@ Move medium(const GameState& state, int goal, Rng& rng) {
     auto validMoves = core::enumerateValidMoves(board);
     if (validMoves.empty()) return INVALID_MOVE;
 
-    // 1. Tìm nước thắng -- dùng fp::filter (HOF)
+    // 1. Tìm nước thắng
     auto winningMoves = fp::filter([&](Move m) {
         Board nb = core::applyMove(board, m, sym);
         return core::checkWin(nb, sym, goal, EndRule::OPEN_TWO);
@@ -194,7 +194,7 @@ Move medium(const GameState& state, int goal, Rng& rng) {
 
     if (!winningMoves.empty()) return winningMoves[0];
 
-    // 2. Tìm nước chặn -- dùng fp::filter (HOF)
+    // 2. Tìm nước chặn
     auto blockingMoves = fp::filter([&](Move m) {
         Board nb = core::applyMove(board, m, opSym);
         return core::checkWin(nb, opSym, goal, EndRule::OPEN_TWO);
@@ -235,7 +235,7 @@ Move medium(const GameState& state, int goal, Rng& rng) {
         return preferred[dist(rng)];
     }
 
-    // 5. Fallback easy
+    // 5. Fallback
     return easy(state, rng);
 }
 
