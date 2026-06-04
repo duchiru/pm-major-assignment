@@ -115,7 +115,8 @@ void Engine::startGame() {
                 currentSelectMenu = SelectType::GOAL_UI;
                 context = gameSetup_.size;
 
-                iRenderer_->showValidSelect(SelectType::SIZE_UI, gameSetup_.size);
+                if (config_->interactive)
+                    iRenderer_->showValidSelect(SelectType::SIZE_UI, gameSetup_.size);
                 logger_->log(std::format("'size' is set to {}", gameSetup_.size), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
@@ -131,7 +132,8 @@ void Engine::startGame() {
                 currentSelectMenu = SelectType::GAME_MODE_UI;
                 context = NO_CONTEXT;
 
-                iRenderer_->showValidSelect(SelectType::GOAL_UI, gameSetup_.goal);
+                if (config_->interactive)
+                    iRenderer_->showValidSelect(SelectType::GOAL_UI, gameSetup_.goal);
                 logger_->log(std::format("'goal' is set to {}", gameSetup_.goal), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
@@ -155,7 +157,8 @@ void Engine::startGame() {
                     context = NO_CONTEXT;
                 }
 
-                iRenderer_->showValidSelect(SelectType::GAME_MODE_UI, (int)(gameSetup_.mode));
+                if (config_->interactive)
+                    iRenderer_->showValidSelect(SelectType::GAME_MODE_UI, (int)(gameSetup_.mode));
                 logger_->log(std::format("'mode' is set to {}", modeToString((int)gameSetup_.mode)), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
@@ -171,7 +174,8 @@ void Engine::startGame() {
             if (iInteraction_->selectBotLevel(gameSetup_.levels.data(), 1)) {
                 settingUp = false;
 
-                iRenderer_->showValidSelect(SelectType::BOT_LEVEL_UI, (int)(gameSetup_.levels[1]));
+                if (config_->interactive)
+                    iRenderer_->showValidSelect(SelectType::BOT_LEVEL_UI, (int)(gameSetup_.levels[1]));
                 logger_->log(std::format("'bot level' is set to {}", botToString((int)gameSetup_.levels[1])), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {
@@ -194,7 +198,8 @@ void Engine::startGame() {
                     context = 1;
                 }
 
-                iRenderer_->showValidSelect(SelectType::MUL_BOT_LEVEL_UI, (int)(gameSetup_.levels[context]));
+                if (config_->interactive)
+                    iRenderer_->showValidSelect(SelectType::MUL_BOT_LEVEL_UI, (int)(gameSetup_.levels[context]));
                 logger_->log(std::format("'bot {} level' is set to {}", context, botToString((int)gameSetup_.levels[context])), Logger::Level::DEBUG);
             } else {
                 if (config_->interactive) {

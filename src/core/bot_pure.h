@@ -81,6 +81,8 @@ using SymbolicBot = std::function<Move(const GameState&, char symbol, int goal, 
  */
 Move easy(const GameState& state, Rng& rng);
 
+extern "C" {
+
 /**
  * Mô tả:
  *   Bot Medium -- heuristic đơn giản:
@@ -98,6 +100,8 @@ Move easy(const GameState& state, Rng& rng);
  *   Có thể dùng currying: `auto isWinningFor = curry(isWinningMove)(state);`.
  */
 Move medium(const GameState& state, int goal, Rng& rng);
+
+}
 
 /**
  * Mô tả:
